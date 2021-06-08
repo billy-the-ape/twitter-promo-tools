@@ -5,7 +5,9 @@ import { Button, CircularProgress, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(({ spacing }) => ({
   img: {
-    marginRight: spacing(1)
+    marginRight: spacing(1),
+    border: '1px solid black',
+    height: 20,
   }
 }));
 
@@ -20,7 +22,7 @@ const SignIn: React.FC = () => {
   if (session && session.user) {
     return (
       <Button variant="contained" onClick={() => signOut()}>
-        {session.user.image && <img className={classes.img} width={20} height={20} src={session.user.image} />}
+        {session.user.image && <img className={classes.img} src={session.user.image} />}
         Sign out
       </Button>
     )
