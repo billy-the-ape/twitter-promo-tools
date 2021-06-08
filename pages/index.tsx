@@ -1,20 +1,17 @@
+import { CssBaseline } from '@material-ui/core';
 import Head from 'next/head'
-import Image from 'next/image'
+import Header from '../components/Header';
 
-import SignIn from '../components/SignIn';
+const Home: React.FC = () => (
+  <div>
+    <CssBaseline />
+    <Head>
+      <title>Twitter Promo Tools</title>
+      <meta name="description" content="Tools for Twitter promoters and managers." />
+      <link rel="icon" href="/favicon.ico" />
+    </Head>
+    <Header />
+  </div>
+);
 
-import styles from '../styles/Home.module.css'
-
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Twitter Promo Tools</title>
-        <meta name="description" content="Tools for Twitter promoters and managers." />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <SignIn />
-    </div>
-  )
-}
+export default Home;

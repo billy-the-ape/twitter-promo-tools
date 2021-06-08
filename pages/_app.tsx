@@ -1,12 +1,14 @@
-import '../styles/globals.css'
-import { Provider } from 'next-auth/client';
+import { Provider as AuthProvider } from 'next-auth/client';
 import type { AppProps } from 'next/app'
 
-function MyApp({ Component, pageProps }: AppProps) {
-  return (
-    <Provider session={pageProps.session}>
+import ThemeProvider from '../components/ThemeProvider';
+
+const App: React.FC<AppProps> = ({ Component, pageProps }) => (
+  <AuthProvider session={pageProps.session}>
+    <ThemeProvider>
       <Component {...pageProps} />
-    </Provider>
-  )
-}
-export default MyApp
+    </ThemeProvider>
+  </AuthProvider>
+);
+
+export default App;
