@@ -72,7 +72,13 @@ export default NextAuth({
   callbacks: {
     // async signIn(user, account, profile) { return true },
     // async redirect(url, baseUrl) { return baseUrl },
-    // async session(session, user) { return session },
+    session: async (session, user) => ({
+      ...session,
+      user: {
+        ...session.user,
+        id: user.sub, // Add twitter id for db interactions
+      }
+    }),
     // async jwt(token, user, account, profile, isNewUser) { return token }
   },
 
