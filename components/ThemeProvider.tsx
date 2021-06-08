@@ -10,8 +10,6 @@ const ThemeProvider: React.FC = ({ children }) => {
 
   const appliedTheme = createMuiTheme(darkMode ? darkTheme : lightTheme);
 
-  console.log({ darkMode })
-
   return (
     <MuiThemeProvider theme={appliedTheme}>{children}</MuiThemeProvider>
   )
