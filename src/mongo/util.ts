@@ -1,6 +1,6 @@
 import { Db, MongoClient } from 'mongodb';
 import { Collection } from 'mongodb';
-import { CollectionTypeMap } from 'types';
+import { CollectionTypeMap } from '@/types';
 
 // Create cached connection variable
 let cachedDb: Db;

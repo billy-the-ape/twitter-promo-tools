@@ -13,7 +13,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import useSWR from 'swr'
 import { useSnackbar } from 'notistack';
-import { Campaign } from 'types';
+import { Campaign } from '@/types';
 import { fetcher } from '@/util';
 import Section from './Section';
 
@@ -31,7 +31,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   },
   paper: {
     padding: spacing(1),
-    backgroundColor: palette.background.paper,
+    backgroundColor: palette.background.default,
   }
 }));
 
