@@ -1,4 +1,3 @@
-import { FreeBreakfastOutlined } from '@material-ui/icons';
 import type { NextApiHandler } from 'next'
 import { getSession } from 'next-auth/client'
 import { Campaign, Session } from '@/types';
