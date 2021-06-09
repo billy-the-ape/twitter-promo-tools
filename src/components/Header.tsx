@@ -7,7 +7,7 @@ import SignIn from './SignIn';
 import { useSharedState } from '@/hooks/useSharedState';
 
 const Header: React.FC = () => {
-  const [darkMode = true, setDarkMode] = useSharedState('darkMode');
+  const [darkMode, setDarkMode] = useSharedState('darkMode');
 
   return (
     <AppBar position="static">

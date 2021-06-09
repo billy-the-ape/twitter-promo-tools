@@ -7,7 +7,7 @@ const darkTheme: ThemeOptions = { palette: { type: 'dark' } };
 const lightTheme: ThemeOptions = { palette: { type: 'light' } };
 
 const ThemeProvider: React.FC = ({ children }) => {
-  const [darkMode = true] = useSharedState('darkMode');
+  const [darkMode] = useSharedState('darkMode');
 
   const appliedTheme = createMuiTheme(darkMode ? darkTheme : lightTheme);
 
