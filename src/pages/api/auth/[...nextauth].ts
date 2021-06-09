@@ -1,3 +1,5 @@
+import { User } from "@/types";
+import { upsertUser } from "mongo/users";
 import NextAuth from "next-auth"
 import Providers from "next-auth/providers"
 
@@ -70,15 +72,34 @@ export default NextAuth({
   // when an action is performed.
   // https://next-auth.js.org/configuration/callbacks
   callbacks: {
-    // async signIn(user, account, profile) { return true },
+    async signIn(user, _, {
+      id_str: sub,
+      location,
+      screen_name: screenName,
+    }) {
+      const u = {
+        ...user,
+        sub,
+        location,
+        screenName,
+      } as User;
+
+      upsertUser(u);
+
+      return true;
+    },
     // async redirect(url, baseUrl) { return baseUrl },
-    session: async (session, user) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.sub, // Add twitter id for db interactions
-      }
-    }),
+    session: async (session, user) => {
+      const s = {
+        ...session,
+        user: {
+          ...session.user,
+          sub: user.sub as string, // Add twitter id for db interactions
+        },
+      };
+
+      return s;
+    },
     // async jwt(token, user, account, profile, isNewUser) { return token }
   },
 

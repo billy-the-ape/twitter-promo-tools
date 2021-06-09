@@ -69,25 +69,24 @@ type GlobalState = {
 const globalState = global.window ? getStoredState() : {} as GlobalState;
 
 export const useSharedState = <
-  TValue extends SharedStateMap[TStateKey] | undefined,
   TStateKey extends keyof SharedStateMap
 >(
   /**
    * The identifier for the piece of state to retrieve and mutate
    */
   stateKey: TStateKey,
-): [TValue, (val: TValue) => void] => {
+): [SharedStateMap[TStateKey], (val: SharedStateMap[TStateKey]) => void] => {
   if (!(stateKey in globalState)) {
-    globalState[stateKey] = new StateItem<TValue>();
+    globalState[stateKey] = new StateItem<SharedStateMap[TStateKey]>();
   }
 
   const state = globalState[stateKey];
-  const [componentVal, setComponentVal] = useState<TValue>(state.value);
+  const [componentVal, setComponentVal] = useState<SharedStateMap[TStateKey]>(state.value);
 
   state.addSetter(setComponentVal);
 
   // Remove the setter when component is unmounted
   useEffect(() => () => state.removeSetter(setComponentVal), [state]);
 
-  return [componentVal, (val: TValue) => state.setState(val)];
+  return [componentVal, (val: SharedStateMap[TStateKey]) => state.setState(val)];
 };

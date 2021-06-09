@@ -1,6 +1,7 @@
 
 import { createMuiTheme, ThemeProvider as MuiThemeProvider, ThemeOptions } from '@material-ui/core';
-import { useSharedState } from '../hooks/use-shared-state';
+import { useSharedState } from '@/hooks/useSharedState';
+
 
 const darkTheme: ThemeOptions = { palette: { type: 'dark' } };
 const lightTheme: ThemeOptions = { palette: { type: 'light' } };
