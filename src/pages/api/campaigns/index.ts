@@ -14,13 +14,13 @@ const handler: NextApiHandler = async (req, res) => {
         res.status(200).json(await getCampaigns(session.user.sub));
         return;
       case 'POST':
-        const status = !req.body._id ? 201 : 200;
         const campaign = JSON.parse(req.body) as Campaign
+        const status = !campaign._id ? 201 : 200;
         res.status(status).json(await upsertCampaign(session.user.sub, campaign));
         return;
     }
   } catch (e) {
-    res.status(500).send(undefined);
+    res.status(500).json(e);
   }
 };
 
