@@ -114,19 +114,18 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
           )}
         </Grid>
       </Section>
-      {showNewDialog ||
-        (editCampaign && (
-          <CampaignDialog
-            open
-            isLoading={isDialogLoading}
-            campaign={editCampaign}
-            onSave={handleSaveCampaign}
-            onClose={() => {
-              setEditCampaign(null);
-              setShowNewDialog(false);
-            }}
-          />
-        ))}
+      {(showNewDialog || editCampaign) && (
+        <CampaignDialog
+          open
+          isLoading={isDialogLoading}
+          campaign={editCampaign}
+          onSave={handleSaveCampaign}
+          onClose={() => {
+            setEditCampaign(null);
+            setShowNewDialog(false);
+          }}
+        />
+      )}
       {deleteRecord && (
         <ConfirmDialog
           open

@@ -11,7 +11,10 @@ import {
   TextField,
   Divider,
 } from '@material-ui/core';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
+import {
+  MuiPickersUtilsProvider,
+  KeyboardDatePicker,
+} from '@material-ui/pickers';
 import dateFns from '@date-io/date-fns';
 import { useState } from 'react';
 
@@ -28,11 +31,11 @@ const useStyles = makeStyles({
 });
 
 export type CampaignDialogProps = Omit<DialogProps, 'onClose'> & {
-  campaign?: Campaign;
+  campaign?: Campaign | null;
   isLoading?: boolean;
   onSave: (newCampaign: Campaign) => void;
   onClose: () => void;
-}
+};
 
 const CampaignDialog: React.FC<CampaignDialogProps> = ({
   campaign,
@@ -43,7 +46,7 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const classes = useStyles();
-  const [newCampaign, setNewCampaign] = useState(campaign || {} as Campaign);
+  const [newCampaign, setNewCampaign] = useState(campaign || ({} as Campaign));
   const [noName, setNoName] = useState(false);
 
   const handleSave = () => {
@@ -56,23 +59,23 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
   };
 
   const handleChange = (changed: Partial<Campaign>) => {
-    console.log("handleChange", { changed })
+    console.log('handleChange', { changed });
     const result = {
       ...newCampaign,
       ...changed,
-    }
+    };
     if (result.name) {
       setNoName(false);
-    };
+    }
     setNewCampaign(result);
   };
-
-
 
   return (
     <MuiPickersUtilsProvider utils={dateFns}>
       <Dialog classes={classes} {...dialogProps} onClose={onClose}>
-        <DialogTitle>{!campaign ? 'New campaign' : `Edit ${campaign.name}`}</DialogTitle>
+        <DialogTitle>
+          {!campaign ? 'New campaign' : `Edit ${campaign.name}`}
+        </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column">
             <TextField
@@ -80,14 +83,18 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
               error={noName}
               label="Name"
               value={newCampaign.name ?? campaign?.name}
-              onChange={({ target: { value } }) => handleChange({ name: value })}
+              onChange={({ target: { value } }) =>
+                handleChange({ name: value })
+              }
             />
             <TextField
               multiline
               id="campaign-description"
               label="Description"
               value={newCampaign.description ?? campaign?.description}
-              onChange={({ target: { value } }) => handleChange({ description: value })}
+              onChange={({ target: { value } }) =>
+                handleChange({ description: value })
+              }
             />
             <Box display="flex">
               <KeyboardDatePicker
@@ -117,7 +124,9 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
                 label="Tweet Count"
                 type="number"
                 value={newCampaign.tweetCount ?? campaign?.tweetCount}
-                onChange={({ target: { value } }) => handleChange({ tweetCount: parseInt(value) })}
+                onChange={({ target: { value } }) =>
+                  handleChange({ tweetCount: parseInt(value) })
+                }
               />
             </Box>
             <UserMultiselect
@@ -133,14 +142,19 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" color="primary" onClick={handleSave} disabled={isLoading}>
-            {isLoading ? <CircularProgress /> : "Save"}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            disabled={isLoading}
+          >
+            {isLoading ? <CircularProgress /> : 'Save'}
           </Button>
           <Button onClick={onClose}>Cancel</Button>
         </DialogActions>
       </Dialog>
     </MuiPickersUtilsProvider>
-  )
-}
+  );
+};
 
 export default CampaignDialog;
