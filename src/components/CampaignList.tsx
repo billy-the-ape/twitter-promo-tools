@@ -1,25 +1,22 @@
-import {
-  Button,
-  CircularProgress,
-  Grid,
-  makeStyles,
-} from '@material-ui/core';
+import { Button, CircularProgress, Grid, makeStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
-import useSWR from 'swr'
+import useSWR from 'swr';
 import { useSnackbar } from 'notistack';
 import { Campaign } from '@/types';
 import { fetchJson } from '@/util';
 import Section from './Section';
 import CampaignListItem from './CampaignListItem';
 
-const CampaignDialog = dynamic(() => import('./CampaignDialog'), { ssr: false });
+const CampaignDialog = dynamic(() => import('./CampaignDialog'), {
+  ssr: false,
+});
 const ConfirmDialog = dynamic(() => import('./ConfirmDialog'), { ssr: false });
 
 export type CampaignListProps = {
   className?: string;
-}
+};
 
 const useStyles = makeStyles({
   item: {
@@ -47,11 +44,14 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
     if (ok) {
       setShowNewDialog(false);
       setEditCampaign(null);
-      enqueueSnackbar(status === 201 ? 'New campaign added.' : 'Campaign updated.', { variant: 'success' })
+      enqueueSnackbar(
+        status === 201 ? 'New campaign added.' : 'Campaign updated.',
+        { variant: 'success' }
+      );
       // Fetch updated campaigns
       await revalidate();
     } else {
-      enqueueSnackbar('An error occurred.', { variant: 'error' })
+      enqueueSnackbar('An error occurred.', { variant: 'error' });
     }
     setIsDialogLoading(false);
   };
@@ -67,11 +67,11 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
     });
     if (ok) {
       setDeleteCampaign(null);
-      enqueueSnackbar('Campaign deleted.', { variant: 'success' })
+      enqueueSnackbar('Campaign deleted.', { variant: 'success' });
       // Fetch updated campaigns
       await revalidate();
     } else {
-      enqueueSnackbar('An error occurred.', { variant: 'error' })
+      enqueueSnackbar('An error occurred.', { variant: 'error' });
     }
     setIsDialogLoading(false);
   };
@@ -80,24 +80,29 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
     <>
       <Section
         title="Campaigns"
-        titleAdornment={(
+        titleAdornment={
           <Button
             variant="contained"
             color="primary"
             onClick={(e) => {
               e.stopPropagation();
-              setShowNewDialog(true)
+              setShowNewDialog(true);
             }}
           >
-            <AddIcon />New Campaign
+            <AddIcon />
+            New Campaign
           </Button>
-        )}
+        }
         badgeNumber={data?.length || 0}
         className={className}
       >
         <Grid container direction="column" spacing={2}>
-          {!data ? <CircularProgress style={{ margin: 'auto' }} /> : (
-            data.length === 0 ? 'No Campaigns' : data.map((campaign) => (
+          {!data ? (
+            <CircularProgress style={{ margin: 'auto' }} />
+          ) : data.length === 0 ? (
+            'No Campaigns'
+          ) : (
+            data.map((campaign) => (
               <Grid item className={classes.item} key={String(campaign._id)}>
                 <CampaignListItem
                   campaign={campaign}
@@ -109,8 +114,8 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
           )}
         </Grid>
       </Section>
-      {
-        showNewDialog || editCampaign && (
+      {showNewDialog ||
+        (editCampaign && (
           <CampaignDialog
             open
             isLoading={isDialogLoading}
@@ -121,22 +126,19 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
               setShowNewDialog(false);
             }}
           />
-        )
-      }
-      {
-        deleteRecord && (
-          <ConfirmDialog
-            open
-            title={`Delete ${deleteRecord.name}`}
-            subText="This cannot be undone.  Are you sure?"
-            confirmText="Delete"
-            onClose={() => setDeleteCampaign(null)}
-            onConfirm={handleDeleteCampaign}
-            isLoading={isDialogLoading}
-          />
-        )
-      }
+        ))}
+      {deleteRecord && (
+        <ConfirmDialog
+          open
+          title={`Delete ${deleteRecord.name}`}
+          subText="This cannot be undone.  Are you sure?"
+          confirmText="Delete"
+          onClose={() => setDeleteCampaign(null)}
+          onConfirm={handleDeleteCampaign}
+          isLoading={isDialogLoading}
+        />
+      )}
     </>
   );
-}
+};
 export default CampaignList;
