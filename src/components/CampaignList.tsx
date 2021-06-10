@@ -21,6 +21,7 @@ import { useSnackbar } from 'notistack';
 import { Campaign } from '@/types';
 import { fetchJson } from '@/util';
 import Section from './Section';
+import CampaignListItem from './CampaignListItem';
 
 const CampaignDialog = dynamic(() => import('./CampaignDialog'), { ssr: false });
 const ConfirmDialog = dynamic(() => import('./ConfirmDialog'), { ssr: false });
@@ -29,21 +30,11 @@ export type CampaignListProps = {
   className?: string;
 }
 
-const useStyles = makeStyles(({ spacing, palette }) => ({
-  title: {
-    margin: spacing(0, 1),
-  },
+const useStyles = makeStyles({
   item: {
     maxWidth: '100%',
   },
-  desc: {
-    flex: 1,
-  },
-  paper: {
-    padding: spacing(1, 2),
-    backgroundColor: palette.background.default,
-  }
-}));
+});
 
 const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const classes = useStyles();
@@ -51,7 +42,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
-  const [deleteRecord, setDeleteRecord] = useState<Campaign | null>(null);
+  const [deleteRecord, setDeleteCampaign] = useState<Campaign | null>(null);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSaveCampaign = async (campaign: Campaign) => {
@@ -84,7 +75,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
       method: 'DELETE',
     });
     if (ok) {
-      setDeleteRecord(null);
+      setDeleteCampaign(null);
       enqueueSnackbar('Campaign deleted.', { variant: 'success' })
       // Fetch updated campaigns
       await revalidate();
@@ -117,33 +108,11 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
           {!data ? <CircularProgress style={{ margin: 'auto' }} /> : (
             data.length === 0 ? 'No Campaigns' : data.map((campaign) => (
               <Grid item className={classes.item} key={String(campaign._id)}>
-                <Box component={Paper} className={classes.paper} display="flex" justifyContent="space-between">
-                  <Box maxWidth="60%" display="flex" alignItems="center">
-                    {/* <Avatar className={classes.avatar} src={image!}>{name.substring(0, 1).toLocaleUpperCase()}</Avatar> */}
-                    <Typography className={classes.title} variant="body1" noWrap>{campaign.name}</Typography>
-                    <Typography className={classes.desc} variant="caption" noWrap>&nbsp;&nbsp;{campaign.description}</Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center">
-                    {campaign.influencers && !!campaign.influencers.length && (
-                      <AvatarGroup spacing="small" max={5}>
-                        {campaign.influencers.map(({ screenName, image }) => (
-                          <Avatar key={screenName} src={image!}>{screenName?.substring(0, 1).toLocaleUpperCase()}</Avatar>
-                        ))}
-                      </AvatarGroup>
-                    )}
-                    <Divider orientation="vertical" />
-                    {campaign.permissions?.canEdit && (
-                      <IconButton onClick={() => setEditCampaign(campaign)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                    {campaign.permissions?.canDelete && (
-                      <IconButton onClick={() => setDeleteRecord(campaign)}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </Box>
-                </Box>
+                <CampaignListItem
+                  campaign={campaign}
+                  setDeleteCampaign={setDeleteCampaign}
+                  setEditCampaign={setEditCampaign}
+                />
               </Grid>
             ))
           )}
@@ -170,7 +139,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
             title={`Delete ${deleteRecord.name}`}
             subText="This cannot be undone.  Are you sure?"
             confirmText="Delete"
-            onClose={() => setDeleteRecord(null)}
+            onClose={() => setDeleteCampaign(null)}
             onConfirm={handleDeleteCampaign}
             isLoading={isDialogLoading}
           />

@@ -13,8 +13,13 @@ const sharedTheme: ThemeOptions = {
       }
     },
     MuiDivider: {
+      root: {
+        margin: '16px 0',
+      },
       vertical: {
         margin: '0 8px',
+        minHeight: '40px',
+        maxHeight: '100%',
       }
     },
     MuiAvatar: {

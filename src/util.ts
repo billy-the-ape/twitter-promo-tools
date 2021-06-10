@@ -24,8 +24,7 @@ export const userDateFormatString = (() => {
     return 'MM/dd/yyyy';
   }
 
-  var locale = window.navigator.language;
-  const formatObj = new Intl.DateTimeFormat(locale).formatToParts(new Date());
+  const formatObj = new Intl.DateTimeFormat(window.navigator.language).formatToParts(new Date());
 
   return formatObj
     .map(obj => {
@@ -42,3 +41,20 @@ export const userDateFormatString = (() => {
     })
     .join("");
 })();
+
+export const formatDate = (date?: Date | string | null, unknownString: string = 'Unknown'): string => {
+  if (isServer) {
+    return '';
+  }
+  if (!date) {
+    return unknownString;
+  }
+
+  const options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'numeric',
+    year: undefined
+  }
+
+  return new Intl.DateTimeFormat(window.navigator.language, options).format(new Date(date))
+};
