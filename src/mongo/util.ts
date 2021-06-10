@@ -16,7 +16,7 @@ export const connectToDatabase = async (): Promise<Db> => {
   }
 
   // If no connection is cached, create a new one
-  const client = await MongoClient.connect(uri, { useNewUrlParser: true });
+  const client = await MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
   // Select the database through the connection,
   // using the database path of the connection string
   const dbName = new URL(uri).pathname.substr(1);
@@ -31,3 +31,4 @@ export const getCollection = async <TKey extends keyof CollectionTypeMap>(key: T
   const db = await connectToDatabase();
   return db.collection(key) as Collection<CollectionTypeMap[TKey]>;
 };
+

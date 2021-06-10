@@ -2,7 +2,7 @@ import type { NextApiHandler } from 'next'
 import { getSession } from 'next-auth/client'
 import { Campaign, Session } from '@/types';
 
-import { getCampaigns, upsertCampaign } from '@/mongo/campaigns';
+import { getCampaignsForUser, upsertCampaign } from '@/mongo/campaigns';
 
 const handler: NextApiHandler = async (req, res) => {
   try {
@@ -10,15 +10,16 @@ const handler: NextApiHandler = async (req, res) => {
 
     switch (req.method) {
       case 'GET':
-        res.status(200).json(await getCampaigns(session.user.sub));
+        res.status(200).json(await getCampaignsForUser(session.user.id));
         return;
       case 'POST':
         const campaign = JSON.parse(req.body) as Campaign
         const status = !campaign._id ? 201 : 200;
-        res.status(status).json(await upsertCampaign(session.user.sub, campaign));
+        res.status(status).json(await upsertCampaign(session.user.id, campaign));
         return;
     }
   } catch (e) {
+    console.log(e);
     res.status(500).json(e);
   }
 };

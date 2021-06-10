@@ -3,10 +3,17 @@ import { Session as NextSession } from 'next-auth';
 
 export type User = NextSession['user'] & {
   _id?: ObjectId;
-  sub: string;
+  id: string;
   addedDate?: Date;
   screenName?: string;
   location?: string;
+}
+
+export type TwitterUser = {
+  id: string;
+  name: string;
+  username: string;
+  profile_image_url: string;
 }
 
 export type Session = Omit<NextSession, 'user'> & {
@@ -19,23 +26,30 @@ export type Tweet = {
   date?: Date;
 }
 
+export type CampaignPermissions = {
+  canDelete: boolean;
+  canEdit: boolean;
+}
+
 export type Campaign = {
   name: string;
-  tweets: Tweet[];
-  creator: string;
-  // twitter ids
-  influencers: string[];
-  // twitter ids
-  managers: string[];
+  creator: string; // twitter id of creator
+  dateAdded: Date;
 
-  _id?: ObjectId;
-  description?: string;
-  image?: string;
-  startDate?: Date;
-  endDate?: Date;
-  addedDate?: Date;
-  pricePer?: number;
-  currency?: string;
+  influencers?: User[];
+  managers?: User[];
+  tweetCount?: number;
+  permissions?: CampaignPermissions;
+  // tweets?: Tweet[];
+
+  _id?: ObjectId | null;
+  description?: string | null;
+  image?: string | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  addedDate?: Date | null;
+  pricePer?: number | null;
+  currency?: string | null;
 }
 
 export type CollectionTypeMap = {

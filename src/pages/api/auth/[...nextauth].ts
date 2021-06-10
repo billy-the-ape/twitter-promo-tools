@@ -1,4 +1,5 @@
 import { User } from "@/types";
+import { Restaurant } from "@material-ui/icons";
 import { upsertUser } from "mongo/users";
 import NextAuth from "next-auth"
 import Providers from "next-auth/providers"
@@ -73,15 +74,17 @@ export default NextAuth({
   // https://next-auth.js.org/configuration/callbacks
   callbacks: {
     async signIn(user, _, {
-      id_str: sub,
+      id_str: id,
       location,
       screen_name: screenName,
+      profile_image_url_https: image,
     }) {
       const u = {
         ...user,
-        sub,
+        id,
         location,
         screenName,
+        image,
       } as User;
 
       upsertUser(u);
@@ -94,7 +97,7 @@ export default NextAuth({
         ...session,
         user: {
           ...session.user,
-          sub: user.sub as string, // Add twitter id for db interactions
+          id: user.sub as string, // Add twitter id for db interactions
         },
       };
 
