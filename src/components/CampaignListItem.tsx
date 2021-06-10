@@ -182,8 +182,8 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
               </Box>
               <Divider />
             </Hidden>
-            {campaign.description.split('\n').map((desc) => (
-              <ReactMarkdown>{desc}</ReactMarkdown>
+            {campaign.description.split('\n').map((desc, i) => (
+              <ReactMarkdown key={i}>{desc}</ReactMarkdown>
             ))}
           </Box>
         </AccordionDetails>
