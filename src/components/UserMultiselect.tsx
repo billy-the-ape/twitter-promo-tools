@@ -53,7 +53,11 @@ const UserMultiselect: React.FC<TwitterAdderProps> = ({
     setFullUsers(allUsers);
 
     const newMissing = newHandles.filter(
-      (h) => !newTwitterUsers.find(({ screenName }) => screenName === h)
+      (h) =>
+        !newTwitterUsers.find(
+          ({ screenName }) =>
+            screenName?.toLocaleLowerCase() === h.toLocaleLowerCase()
+        )
     );
 
     if (newMissing.length) {
@@ -88,8 +92,10 @@ const UserMultiselect: React.FC<TwitterAdderProps> = ({
         <Grid container spacing={1}>
           {handles.map((str) => {
             const twitterUser = fullUsers.find(
-              ({ screenName }) => screenName === str
+              ({ screenName }) =>
+                screenName?.toLocaleLowerCase() === str.toLocaleLowerCase()
             );
+            const name = twitterUser?.screenName ?? str;
             return (
               <Grid item key={str}>
                 <Chip
@@ -100,7 +106,7 @@ const UserMultiselect: React.FC<TwitterAdderProps> = ({
                       </Avatar>
                     )
                   }
-                  label={`@${str}`}
+                  label={`@${name}`}
                   onDelete={() => removeHandle(str)}
                   {...(missingHandles.includes(str) && {
                     variant: 'outlined',
