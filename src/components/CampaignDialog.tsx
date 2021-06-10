@@ -130,12 +130,12 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
               />
             </Box>
             <UserMultiselect
-              label="Add Promoters by Twitter Handle"
+              label="Add Promoters by Twitter Handle or Url"
               users={campaign?.influencers}
               onUsersSelected={(influencers) => handleChange({ influencers })}
             />
             <UserMultiselect
-              label="Add Managers by Twitter Handle"
+              label="Add Managers by Twitter Handle or Url"
               users={campaign?.managers}
               onUsersSelected={(managers) => handleChange({ managers })}
             />
