@@ -3,10 +3,10 @@ import {
 } from 'next-auth/client'
 import { Button, CircularProgress, makeStyles } from '@material-ui/core';
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ spacing, palette }) => ({
   img: {
     marginRight: spacing(1),
-    border: '1px solid black',
+    border: `1px solid ${palette.grey[500]}`,
     height: 20,
   }
 }));

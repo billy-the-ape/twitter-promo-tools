@@ -8,13 +8,14 @@ import { useSharedState } from '@/hooks/useSharedState';
 
 const Header: React.FC = () => {
   const [darkMode, setDarkMode] = useSharedState('darkMode');
+  const headerIconColor = darkMode ? 'rgba(0, 0, 0, 0.87)' : 'white';
 
   return (
     <AppBar position="static">
       <Toolbar>
         <Link href="/">
           <IconButton edge="start">
-            <TwitterIcon htmlColor="white" />
+            <TwitterIcon htmlColor={headerIconColor} />
           </IconButton>
         </Link>
         <Box flex="1">
@@ -30,7 +31,7 @@ const Header: React.FC = () => {
         <SignIn />
         <Box ml={2}>
           <IconButton onClick={() => setDarkMode(!darkMode)}>
-            <DarkModeIcon htmlColor="white" />
+            <DarkModeIcon htmlColor={headerIconColor} />
           </IconButton>
         </Box>
       </Toolbar>

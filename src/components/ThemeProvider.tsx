@@ -40,8 +40,19 @@ const darkTheme: ThemeOptions = {
   palette: {
     type: 'dark',
     primary: { main: '#3399ff' },
-
   },
+  overrides: {
+    ...sharedTheme.overrides,
+    MuiButton: {
+      contained: {
+        color: 'white',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        '&:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        }
+      }
+    }
+  }
 };
 const lightTheme: ThemeOptions = {
   ...sharedTheme,
