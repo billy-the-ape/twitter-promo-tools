@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
 import useSWR from 'swr';
 import { useSnackbar } from 'notistack';
+import { useTranslation } from 'react-i18next';
 import { Campaign } from '@/types';
 import { fetchJson } from '@/util';
 import Section from './Section';
@@ -26,6 +27,7 @@ const useStyles = makeStyles({
 
 const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const classes = useStyles();
+  const { t } = useTranslation();
   const { data, revalidate } = useSWR<Campaign[]>('/api/campaigns', fetchJson);
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
@@ -45,13 +47,13 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
       setShowNewDialog(false);
       setEditCampaign(null);
       enqueueSnackbar(
-        status === 201 ? 'New campaign added.' : 'Campaign updated.',
+        status === 201 ? t('new_campaign_added') : t('campaign_updated'),
         { variant: 'success' }
       );
       // Fetch updated campaigns
       await revalidate();
     } else {
-      enqueueSnackbar('An error occurred.', { variant: 'error' });
+      enqueueSnackbar(t('an_error_occurred'), { variant: 'error' });
     }
     setIsDialogLoading(false);
   };
@@ -67,11 +69,11 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
     });
     if (ok) {
       setDeleteCampaign(null);
-      enqueueSnackbar('Campaign deleted.', { variant: 'success' });
+      enqueueSnackbar(t('campaign_deleted'), { variant: 'success' });
       // Fetch updated campaigns
       await revalidate();
     } else {
-      enqueueSnackbar('An error occurred.', { variant: 'error' });
+      enqueueSnackbar(t('an_error_occurred'), { variant: 'error' });
     }
     setIsDialogLoading(false);
   };
@@ -79,7 +81,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   return (
     <>
       <Section
-        title="Campaigns"
+        title={t('campaigns')}
         titleAdornment={
           <Button
             variant="contained"
@@ -90,7 +92,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
             }}
           >
             <AddIcon />
-            New Campaign
+            {t('new_campaign')}
           </Button>
         }
         badgeNumber={data?.length || 0}
@@ -100,7 +102,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
           {!data ? (
             <CircularProgress style={{ margin: 'auto' }} />
           ) : data.length === 0 ? (
-            'No Campaigns'
+            t('no_campaigns')
           ) : (
             data.map((campaign) => (
               <Grid item className={classes.item} key={String(campaign._id)}>
@@ -129,8 +131,8 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
       {deleteRecord && (
         <ConfirmDialog
           open
-          title={`Delete ${deleteRecord.name}`}
-          subText="This cannot be undone.  Are you sure?"
+          title={t('delete_name', { name: deleteRecord.name })}
+          subText={t('delete_confirm')}
           confirmText="Delete"
           onClose={() => setDeleteCampaign(null)}
           onConfirm={handleDeleteCampaign}

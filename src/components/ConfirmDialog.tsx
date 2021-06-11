@@ -9,6 +9,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export type ConfirmDialogProps = Omit<DialogProps, 'onClose'> & {
   title: ReactNode;
@@ -27,28 +28,31 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onClose,
   ...rest
-}) => (
-  <Dialog {...rest} onClose={onClose}>
-    <DialogTitle>
-      {title}
-    </DialogTitle>
-    {subText && (
-      <DialogContent>
-        <Typography variant="body1">
-          {subText}
-        </Typography>
-      </DialogContent>
-    )}
-    <DialogActions>
-      <Button variant="contained" color="primary" onClick={async () => {
-        await onConfirm();
-        onClose();
-      }} disabled={isLoading}>
-        {isLoading ? <CircularProgress /> : "Confirm"}
-      </Button>
-      <Button onClick={onClose}>Cancel</Button>
-    </DialogActions>
-  </Dialog>
-);
-
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Dialog {...rest} onClose={onClose}>
+      <DialogTitle>{title}</DialogTitle>
+      {subText && (
+        <DialogContent>
+          <Typography variant="body1">{subText}</Typography>
+        </DialogContent>
+      )}
+      <DialogActions>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={async () => {
+            await onConfirm();
+            onClose();
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? <CircularProgress /> : t('confirm')}
+        </Button>
+        <Button onClick={onClose}>{t('cancel')}</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 export default ConfirmDialog;

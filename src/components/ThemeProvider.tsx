@@ -1,8 +1,9 @@
-
-import { createMuiTheme, ThemeProvider as MuiThemeProvider, ThemeOptions } from '@material-ui/core';
+import {
+  createMuiTheme,
+  ThemeProvider as MuiThemeProvider,
+  ThemeOptions,
+} from '@material-ui/core';
 import { useSharedState } from '@/hooks/useSharedState';
-
-
 
 const sharedTheme: ThemeOptions = {
   overrides: {
@@ -10,7 +11,7 @@ const sharedTheme: ThemeOptions = {
       root: {
         marginTop: 8,
         width: '100%',
-      }
+      },
     },
     MuiDivider: {
       root: {
@@ -20,7 +21,7 @@ const sharedTheme: ThemeOptions = {
         margin: '0 8px',
         minHeight: '40px',
         maxHeight: '100%',
-      }
+      },
     },
     MuiAvatar: {
       root: {
@@ -29,11 +30,11 @@ const sharedTheme: ThemeOptions = {
         fontSize: '12px',
         '&:last-child': {
           marginRight: '8px',
-        }
-      }
-    }
-  }
-}
+        },
+      },
+    },
+  },
+};
 
 const darkTheme: ThemeOptions = {
   ...sharedTheme,
@@ -49,27 +50,28 @@ const darkTheme: ThemeOptions = {
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
         '&:hover': {
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 };
 const lightTheme: ThemeOptions = {
   ...sharedTheme,
   palette: {
     type: 'light',
     background: { default: '#ccc' },
-  }
+  },
 };
 
 const ThemeProvider: React.FC = ({ children }) => {
-  const [darkMode] = useSharedState('darkMode');
+  const [darkMode = true] = useSharedState('darkMode');
 
-  const appliedTheme = createMuiTheme({ ...sharedTheme, ...(darkMode ? darkTheme : lightTheme) });
+  const appliedTheme = createMuiTheme({
+    ...sharedTheme,
+    ...(darkMode ? darkTheme : lightTheme),
+  });
 
-  return (
-    <MuiThemeProvider theme={appliedTheme}>{children}</MuiThemeProvider>
-  )
+  return <MuiThemeProvider theme={appliedTheme}>{children}</MuiThemeProvider>;
 };
 
 export default ThemeProvider;

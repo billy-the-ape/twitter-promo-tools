@@ -9,6 +9,7 @@ import {
   Hidden,
   IconButton,
   makeStyles,
+  Tooltip,
   Typography,
 } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
@@ -17,6 +18,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { AvatarGroup } from '@material-ui/lab';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from 'react-i18next';
+
 import { formatDate } from '@/util';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
@@ -44,6 +47,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   setDeleteCampaign,
 }) => {
   const classes = useStyles();
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const isMobile = useIsMobile();
 
@@ -55,7 +59,15 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
     >
       <AccordionSummary
         classes={{ content: classes.summaryContent }}
-        expandIcon={campaign.description && <ExpandMoreIcon />}
+        expandIcon={
+          campaign.description && (
+            <Tooltip
+              title={isExpanded ? String(t('collapse')) : String(t('expand'))}
+            >
+              <ExpandMoreIcon />
+            </Tooltip>
+          )
+        }
       >
         <Box
           width="100%"
@@ -108,24 +120,30 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
             )}
             <Divider orientation="vertical" />
             {setEditCampaign && campaign.permissions?.canEdit && (
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditCampaign(campaign);
-                }}
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
+              <Tooltip title={String(t('edit'))}>
+                <IconButton
+                  aria-label={t('edit')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditCampaign(campaign);
+                  }}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             )}
             {setDeleteCampaign && campaign.permissions?.canDelete && (
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteCampaign(campaign);
-                }}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
+              <Tooltip title={String(t('delete'))}>
+                <IconButton
+                  aria-label={t('delete')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteCampaign(campaign);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             )}
           </Box>
         </Box>

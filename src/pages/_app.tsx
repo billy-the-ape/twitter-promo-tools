@@ -1,7 +1,8 @@
 import { Provider as AuthProvider } from 'next-auth/client';
-import type { AppProps } from 'next/app'
+import type { AppProps } from 'next/app';
 import ThemeProvider from '@/components/ThemeProvider';
 import { SnackbarProvider, SnackbarProviderProps } from 'notistack';
+import { appWithTranslation } from 'next-i18next';
 
 const SNACKBAR_DEFAULTS: Omit<SnackbarProviderProps, 'children'> = {
   maxSnack: 2,
@@ -10,7 +11,7 @@ const SNACKBAR_DEFAULTS: Omit<SnackbarProviderProps, 'children'> = {
     vertical: 'top',
   },
   autoHideDuration: 3000,
-}
+};
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => (
   <AuthProvider session={pageProps.session}>
@@ -22,4 +23,4 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => (
   </AuthProvider>
 );
 
-export default App;
+export default appWithTranslation(App);

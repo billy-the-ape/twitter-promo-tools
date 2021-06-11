@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import Section from './Section';
 
-const TodoList = () => (
-  <Section title="Todos" badgeNumber={4}>
-    TODO: THIS LIST!
-  </Section>
-)
-
+const TodoList: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <Section title={t('todos')} badgeNumber={4}>
+      TODO: THIS LIST!
+    </Section>
+  );
+};
 export default TodoList;

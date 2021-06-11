@@ -17,6 +17,7 @@ import {
 } from '@material-ui/pickers';
 import dateFns from '@date-io/date-fns';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Campaign } from '@/types';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -46,6 +47,7 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const classes = useStyles();
+  const { t } = useTranslation();
   const [newCampaign, setNewCampaign] = useState(campaign || ({} as Campaign));
   const [noName, setNoName] = useState(false);
 
@@ -74,14 +76,16 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
     <MuiPickersUtilsProvider utils={dateFns}>
       <Dialog classes={classes} {...dialogProps} onClose={onClose}>
         <DialogTitle>
-          {!campaign ? 'New campaign' : `Edit ${campaign.name}`}
+          {!campaign
+            ? t('new_campaign')
+            : t('edit_campaign', { name: campaign.name })}
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column">
             <TextField
               required
               error={noName}
-              label="Name"
+              label={t('name')}
               value={newCampaign.name ?? campaign?.name}
               onChange={({ target: { value } }) =>
                 handleChange({ name: value })
@@ -90,7 +94,7 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
             <TextField
               multiline
               id="campaign-description"
-              label="Description"
+              label={t('description')}
               value={newCampaign.description ?? campaign?.description}
               onChange={({ target: { value } }) =>
                 handleChange({ description: value })
@@ -103,7 +107,7 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
                 variant={isMobile ? 'dialog' : 'inline'}
                 format={userDateFormatString}
                 id="campaign-start-date"
-                label="Start Date"
+                label={t('start_date')}
                 value={newCampaign.startDate ?? campaign?.startDate ?? null}
                 onChange={(startDate) => handleChange({ startDate })}
               />
@@ -114,14 +118,14 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
                 variant={isMobile ? 'dialog' : 'inline'}
                 format={userDateFormatString}
                 id="campaign-end-date"
-                label="End Date"
+                label={t('end_date')}
                 value={newCampaign.endDate ?? campaign?.endDate ?? null}
                 onChange={(endDate) => handleChange({ endDate })}
               />
               <Box ml={2} />
               <TextField
                 id="campaign-tweet-count"
-                label="Tweet Count"
+                label={t('tweet_count')}
                 type="number"
                 value={newCampaign.tweetCount ?? campaign?.tweetCount}
                 onChange={({ target: { value } }) =>
@@ -130,12 +134,12 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
               />
             </Box>
             <UserMultiselect
-              label="Add Promoters by Twitter Handle or Url"
+              label={t('add_promoters')}
               users={campaign?.influencers}
               onUsersSelected={(influencers) => handleChange({ influencers })}
             />
             <UserMultiselect
-              label="Add Managers by Twitter Handle or Url"
+              label={t('add_managers')}
               users={campaign?.managers}
               onUsersSelected={(managers) => handleChange({ managers })}
             />
@@ -147,10 +151,13 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
             color="primary"
             onClick={handleSave}
             disabled={isLoading}
+            aria-label={t('save')}
           >
-            {isLoading ? <CircularProgress /> : 'Save'}
+            {isLoading ? <CircularProgress /> : t('save')}
           </Button>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose} aria-label={t('cancel')}>
+            {t('cancel')}
+          </Button>
         </DialogActions>
       </Dialog>
     </MuiPickersUtilsProvider>
