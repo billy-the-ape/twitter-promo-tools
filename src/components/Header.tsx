@@ -17,7 +17,6 @@ import SignIn from './SignIn';
 
 const Header: React.FC = () => {
   const [darkMode = true, setDarkMode] = useSharedState('darkMode');
-  console.log({ darkMode });
   const headerIconColor = darkMode ? 'rgba(0, 0, 0, 0.87)' : 'white';
   const { t } = useTranslation();
 

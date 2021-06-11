@@ -48,7 +48,54 @@ export const getCampaigns = async (
   query: FilterQuery<Campaign>
 ): Promise<Campaign[]> => {
   const collection = await getCollection('campaigns');
-  const result = await collection.find(query).toArray();
+  const result = await collection
+    .aggregate([
+      {
+        $match: query,
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'managers.id',
+          foreignField: 'id',
+          as: 'u1',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'creator',
+          foreignField: 'id',
+          as: 'u2',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'influencers.id',
+          foreignField: 'id',
+          as: 'u3',
+        },
+      },
+      {
+        $addFields: {
+          users: {
+            $setDifference: [
+              {
+                $concatArrays: ['$u1', '$u2', '$u3'],
+              },
+              [],
+            ],
+          },
+        },
+      },
+      {
+        $unset: ['u1', 'u2', 'u3'],
+      },
+    ])
+    .toArray();
+
+  console.log(result[4]?.users);
 
   return result.map((campaign) => ({
     ...campaign,

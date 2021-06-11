@@ -1,6 +1,6 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
-import { formatDate } from '@/util';
+import { formatDate, getFullUserData } from '@/util';
 import {
   Accordion,
   AccordionDetails,
@@ -52,7 +52,6 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
 
   return (
     <Accordion
-      disabled={!campaign.description}
       className={classes.campaignItemRoot}
       onChange={(_, expanded) => setIsExpanded(expanded)}
     >
@@ -109,11 +108,15 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
             {campaign.influencers && !!campaign.influencers.length && (
               <Hidden xsDown>
                 <AvatarGroup spacing="small" max={5}>
-                  {campaign.influencers.map(({ screenName, image }) => (
-                    <Avatar key={screenName} src={image!}>
-                      {screenName?.substring(0, 1).toLocaleUpperCase()}
-                    </Avatar>
-                  ))}
+                  {campaign.influencers.map((u) => {
+                    const { screenName, image } =
+                      getFullUserData(u, campaign.users!) ?? {};
+                    return (
+                      <Avatar key={screenName} src={image!}>
+                        {screenName?.substring(0, 1).toLocaleUpperCase()}
+                      </Avatar>
+                    );
+                  })}
                 </AvatarGroup>
               </Hidden>
             )}
@@ -188,11 +191,15 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 {campaign.influencers && campaign.influencers.length && (
                   <Hidden smUp>
                     <AvatarGroup spacing="small" max={3}>
-                      {campaign.influencers.map(({ screenName, image }) => (
-                        <Avatar key={screenName} src={image!}>
-                          {screenName?.substring(0, 1).toLocaleUpperCase()}
-                        </Avatar>
-                      ))}
+                      {campaign.influencers.map((u) => {
+                        const { screenName, image } =
+                          getFullUserData(u, campaign.users!) ?? {};
+                        return (
+                          <Avatar key={screenName} src={image!}>
+                            {screenName?.substring(0, 1).toLocaleUpperCase()}
+                          </Avatar>
+                        );
+                      })}
                     </AvatarGroup>
                   </Hidden>
                 )}

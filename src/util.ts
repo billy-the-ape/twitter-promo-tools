@@ -1,4 +1,4 @@
-import { TwitterUser, User } from '@/types';
+import { TwitterUser, User, UserBase } from '@/types';
 
 export const fetchJson = <
   TResponse extends Record<string, any> | Record<string, any>[]
@@ -66,3 +66,6 @@ export const formatDate = (
     new Date(date)
   );
 };
+
+export const getFullUserData = ({ id: findId }: UserBase, users?: User[]) =>
+  users?.find(({ id }) => id === findId);

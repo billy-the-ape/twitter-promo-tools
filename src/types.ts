@@ -1,13 +1,17 @@
 import { ObjectId } from 'mongodb';
 import { Session as NextSession } from 'next-auth';
 
-export type User = NextSession['user'] & {
-  _id?: ObjectId;
+export type UserBase = {
   id: string;
-  addedDate?: Date;
-  screenName?: string;
-  location?: string;
 };
+
+export type User = NextSession['user'] &
+  UserBase & {
+    _id?: ObjectId;
+    addedDate?: Date;
+    screenName?: string;
+    location?: string;
+  };
 
 export type TwitterUser = {
   id: string;
@@ -36,8 +40,9 @@ export type Campaign = {
   creator: string; // twitter id of creator
   dateAdded: Date;
 
-  influencers?: User[];
-  managers?: User[];
+  influencers?: UserBase[];
+  managers?: UserBase[];
+  users?: User[];
   tweetCount?: number;
   permissions?: CampaignPermissions;
   // tweets?: Tweet[];

@@ -8,7 +8,8 @@
     "build-static": "next build && next export",
     "start": "next start",
     "lint": "eslint --ext ts --ext tsx --ext js",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "type-check": "tsc --pretty --noEmit"
   },
   "dependencies": {
     "@date-io/date-fns": "1.x",

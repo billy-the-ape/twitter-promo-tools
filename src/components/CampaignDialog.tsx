@@ -60,7 +60,6 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
   };
 
   const handleChange = (changed: Partial<Campaign>) => {
-    console.log('handleChange', { changed });
     const result = {
       ...newCampaign,
       ...changed,

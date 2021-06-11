@@ -36,12 +36,26 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const [deleteRecord, setDeleteCampaign] = useState<Campaign | null>(null);
   const { enqueueSnackbar } = useSnackbar();
 
-  const handleSaveCampaign = async (campaign: Campaign) => {
+  const handleSaveCampaign = async ({
+    influencers,
+    managers,
+    ...campaign
+  }: Campaign) => {
     setIsDialogLoading(true);
+
+    const saveCampaign: Campaign = {
+      ...campaign,
+      influencers: influencers?.map(({ id }) => ({
+        id,
+      })),
+      managers: managers?.map(({ id }) => ({
+        id,
+      })),
+    };
 
     const { ok, status } = await fetch('/api/campaigns', {
       method: 'POST',
-      body: JSON.stringify(campaign),
+      body: JSON.stringify(saveCampaign),
     });
 
     if (ok) {

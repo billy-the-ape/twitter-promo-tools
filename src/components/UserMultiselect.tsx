@@ -69,7 +69,6 @@ const UserMultiselect: React.FC<TwitterAdderProps> = ({
   };
 
   const removeHandle = (str: string) => {
-    console.log(`remove handle ${str}`);
     const allUsers = fullUsers.filter(({ screenName }) => screenName !== str);
     setFullUsers(allUsers);
     setHandles(handles.filter((s) => s !== str));
