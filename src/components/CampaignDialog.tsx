@@ -1,27 +1,26 @@
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { Campaign } from '@/types';
+import { userDateFormatString } from '@/util';
+import dateFns from '@date-io/date-fns';
 import {
-  Button,
   Box,
+  Button,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogProps,
   DialogTitle,
-  makeStyles,
-  TextField,
   Divider,
+  TextField,
+  makeStyles,
 } from '@material-ui/core';
 import {
-  MuiPickersUtilsProvider,
   KeyboardDatePicker,
+  MuiPickersUtilsProvider,
 } from '@material-ui/pickers';
-import dateFns from '@date-io/date-fns';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { Campaign } from '@/types';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { userDateFormatString } from '@/util';
 
 import UserMultiselect from './UserMultiselect';
 

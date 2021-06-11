@@ -1,6 +1,7 @@
-import { FilterQuery, ObjectId } from 'mongodb';
-import { getCollection } from './util';
 import { Campaign } from '@/types';
+import { FilterQuery, ObjectId } from 'mongodb';
+
+import { getCollection } from './util';
 
 export const upsertCampaign = async (userId: string, campaign: Campaign) => {
   const collection = await getCollection('campaigns');

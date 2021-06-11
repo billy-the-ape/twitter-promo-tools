@@ -17,25 +17,31 @@ const getStoredState = (): GlobalState => {
   // DEFINES DEFAULT STATE
   let state: SharedStateMap = {
     darkMode: true,
-  }
+  };
   if (storageStr) {
     state = JSON.parse(storageStr) as SharedStateMap;
   }
-  return Object.entries(state).reduce<GlobalState>((acc, [key, value]) => ({
-    ...acc,
-    [key]: new StateItem(value)
-  }), {} as GlobalState);
+  return Object.entries(state).reduce<GlobalState>(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: new StateItem(value),
+    }),
+    {} as GlobalState
+  );
 };
 
 const setStoredState = () => {
-  const state: SharedStateMap = Object.entries(globalState).reduce((acc, [key, value]) => ({
-    ...acc,
-    [key]: value.value
-  }), {} as SharedStateMap)
+  const state: SharedStateMap = Object.entries(globalState).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: value.value,
+    }),
+    {} as SharedStateMap
+  );
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+};
 
-class StateItem<TValue>{
+class StateItem<TValue> {
   constructor(value?: TValue) {
     this.setters = [];
     this.value = value;
@@ -66,27 +72,30 @@ type GlobalState = {
   [key in keyof SharedStateMap]: StateItem<any>;
 };
 
-const globalState = global.window ? getStoredState() : {} as GlobalState;
+const globalState = global.window ? getStoredState() : ({} as GlobalState);
 
-export const useSharedState = <
-  TStateKey extends keyof SharedStateMap
->(
+export const useSharedState = <TStateKey extends keyof SharedStateMap>(
   /**
    * The identifier for the piece of state to retrieve and mutate
    */
-  stateKey: TStateKey,
+  stateKey: TStateKey
 ): [SharedStateMap[TStateKey], (val: SharedStateMap[TStateKey]) => void] => {
   if (!(stateKey in globalState)) {
     globalState[stateKey] = new StateItem<SharedStateMap[TStateKey]>();
   }
 
   const state = globalState[stateKey];
-  const [componentVal, setComponentVal] = useState<SharedStateMap[TStateKey]>(state.value);
+  const [componentVal, setComponentVal] = useState<SharedStateMap[TStateKey]>(
+    state.value
+  );
 
   state.addSetter(setComponentVal);
 
   // Remove the setter when component is unmounted
   useEffect(() => () => state.removeSetter(setComponentVal), [state]);
 
-  return [componentVal, (val: SharedStateMap[TStateKey]) => state.setState(val)];
+  return [
+    componentVal,
+    (val: SharedStateMap[TStateKey]) => state.setState(val),
+  ];
 };

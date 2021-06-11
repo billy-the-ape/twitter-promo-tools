@@ -1,4 +1,4 @@
-import { useSession } from 'next-auth/client'
+import { useSession } from 'next-auth/client';
 
 export const useIsLoggedIn = () => {
   const [session] = useSession();

@@ -1,8 +1,8 @@
-import { User } from "@/types";
-import { Restaurant } from "@material-ui/icons";
-import { upsertUser } from "mongo/users";
-import NextAuth from "next-auth"
-import Providers from "next-auth/providers"
+import { User } from '@/types';
+import { Restaurant } from '@material-ui/icons';
+import { upsertUser } from 'mongo/users';
+import NextAuth from 'next-auth';
+import Providers from 'next-auth/providers';
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
@@ -73,12 +73,16 @@ export default NextAuth({
   // when an action is performed.
   // https://next-auth.js.org/configuration/callbacks
   callbacks: {
-    async signIn(user, _, {
-      id_str: id,
-      location,
-      screen_name: screenName,
-      profile_image_url_https: image,
-    }) {
+    async signIn(
+      user,
+      _,
+      {
+        id_str: id,
+        location,
+        screen_name: screenName,
+        profile_image_url_https: image,
+      }
+    ) {
       const u = {
         ...user,
         id,
@@ -112,4 +116,4 @@ export default NextAuth({
 
   // Enable debug messages in the console if you are having problems
   debug: false,
-})
+});

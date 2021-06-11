@@ -7,14 +7,14 @@ export type User = NextSession['user'] & {
   addedDate?: Date;
   screenName?: string;
   location?: string;
-}
+};
 
 export type TwitterUser = {
   id: string;
   name: string;
   username: string;
   profile_image_url: string;
-}
+};
 
 export type Session = Omit<NextSession, 'user'> & {
   user: User;
@@ -24,12 +24,12 @@ export type Tweet = {
   _id?: ObjectId;
   note?: string;
   date?: Date;
-}
+};
 
 export type CampaignPermissions = {
   canDelete: boolean;
   canEdit: boolean;
-}
+};
 
 export type Campaign = {
   name: string;
@@ -50,9 +50,9 @@ export type Campaign = {
   addedDate?: Date | null;
   pricePer?: number | null;
   currency?: string | null;
-}
+};
 
 export type CollectionTypeMap = {
-  'users': User;
-  'campaigns': Campaign;
-}
+  users: User;
+  campaigns: Campaign;
+};

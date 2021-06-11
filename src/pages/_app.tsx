@@ -1,8 +1,8 @@
-import { Provider as AuthProvider } from 'next-auth/client';
-import type { AppProps } from 'next/app';
 import ThemeProvider from '@/components/ThemeProvider';
-import { SnackbarProvider, SnackbarProviderProps } from 'notistack';
+import { Provider as AuthProvider } from 'next-auth/client';
 import { appWithTranslation } from 'next-i18next';
+import type { AppProps } from 'next/app';
+import { SnackbarProvider, SnackbarProviderProps } from 'notistack';
 
 const SNACKBAR_DEFAULTS: Omit<SnackbarProviderProps, 'children'> = {
   maxSnack: 2,

@@ -1,3 +1,4 @@
+import { useSharedState } from '@/hooks/useSharedState';
 import {
   AppBar,
   Box,
@@ -8,12 +9,11 @@ import {
   Typography,
 } from '@material-ui/core';
 import DarkModeIcon from '@material-ui/icons/Brightness6';
-import Link from 'next/link';
 import TwitterIcon from '@material-ui/icons/Twitter';
 import { useTranslation } from 'next-i18next';
+import Link from 'next/link';
 
 import SignIn from './SignIn';
-import { useSharedState } from '@/hooks/useSharedState';
 
 const Header: React.FC = () => {
   const [darkMode = true, setDarkMode] = useSharedState('darkMode');

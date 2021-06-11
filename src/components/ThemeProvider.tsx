@@ -1,9 +1,9 @@
+import { useSharedState } from '@/hooks/useSharedState';
 import {
-  createMuiTheme,
   ThemeProvider as MuiThemeProvider,
   ThemeOptions,
+  createMuiTheme,
 } from '@material-ui/core';
-import { useSharedState } from '@/hooks/useSharedState';
 
 const sharedTheme: ThemeOptions = {
   overrides: {

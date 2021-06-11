@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { Avatar, Box, Chip, Grid, TextField } from '@material-ui/core';
-
 import { User } from '@/types';
 import { fetchJson, noop } from '@/util';
+import { Avatar, Box, Chip, Grid, TextField } from '@material-ui/core';
+import { useState } from 'react';
 
 export type TwitterAdderProps = {
   label: string;

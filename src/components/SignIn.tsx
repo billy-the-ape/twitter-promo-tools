@@ -1,5 +1,5 @@
-import { useSession, signIn, signOut } from 'next-auth/client';
 import { Button, CircularProgress, makeStyles } from '@material-ui/core';
+import { signIn, signOut, useSession } from 'next-auth/client';
 import { useTranslation } from 'next-i18next';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({

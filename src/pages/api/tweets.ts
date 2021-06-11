@@ -1,5 +1,5 @@
-import type { NextApiHandler } from 'next'
-import { getSession } from 'next-auth/client'
+import type { NextApiHandler } from 'next';
+import { getSession } from 'next-auth/client';
 
 const handler: NextApiHandler = async (req, res) => {
   const session = await getSession({ req });

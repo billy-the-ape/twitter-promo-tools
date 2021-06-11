@@ -1,4 +1,6 @@
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
+import { formatDate } from '@/util';
 import {
   Accordion,
   AccordionDetails,
@@ -8,20 +10,17 @@ import {
   Divider,
   Hidden,
   IconButton,
-  makeStyles,
   Tooltip,
   Typography,
+  makeStyles,
 } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { AvatarGroup } from '@material-ui/lab';
 import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { useTranslation } from 'react-i18next';
-
-import { formatDate } from '@/util';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import ReactMarkdown from 'react-markdown';
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   campaignItemRoot: {

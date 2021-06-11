@@ -4,9 +4,12 @@ import type { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 export type UseIsMobileProps = {
   defaultMatches?: boolean;
   breakpoint?: number | Breakpoint;
-}
+};
 
-export const useIsMobile = ({ breakpoint = 'xs', defaultMatches = false }: UseIsMobileProps = {}) => {
+export const useIsMobile = ({
+  breakpoint = 'xs',
+  defaultMatches = false,
+}: UseIsMobileProps = {}) => {
   const { breakpoints } = useTheme();
-  return useMediaQuery(breakpoints.down(breakpoint), { defaultMatches })
-}
+  return useMediaQuery(breakpoints.down(breakpoint), { defaultMatches });
+};
