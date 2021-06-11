@@ -1,6 +1,18 @@
-import { CollectionTypeMap } from '@/types';
+import { Campaign, CampaignPermissions, CollectionTypeMap } from '@/types';
 import { Db, MongoClient } from 'mongodb';
 import { Collection } from 'mongodb';
+
+export const getUserCampaignPermissions = (
+  userId: string,
+  campaign: Campaign
+): CampaignPermissions => ({
+  canEdit:
+    (campaign.creator === userId ||
+      campaign.managers?.some(({ id }) => id === userId)) ??
+    false,
+  canDelete: campaign.creator === userId,
+  canTweet: campaign.influencers?.some(({ id }) => id === userId) ?? false,
+});
 
 // Create cached connection variable
 let cachedDb: Db;

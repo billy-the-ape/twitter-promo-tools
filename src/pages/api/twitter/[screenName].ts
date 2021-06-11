@@ -1,6 +1,6 @@
 import { getUsers, upsertUser } from '@/mongo/users';
-import { User } from '@/types';
-import { fetchJson } from '@/util';
+import { TwitterUser, User } from '@/types';
+import { fetchJson, fetchTwitterApi } from '@/util';
 import { mapTwitterToUsers } from '@/util';
 import type { NextApiHandler } from 'next';
 
@@ -19,13 +19,8 @@ const handler: NextApiHandler<User[]> = async (req, res) => {
     return res.status(200).json(users);
   }
 
-  const { data = [] } = await fetchJson(
-    `https://api.twitter.com/2/users/by?usernames=${unknownNames.join()}&user.fields=profile_image_url,location`,
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.TWITTER_BEARER}`,
-      },
-    }
+  const data = await fetchTwitterApi<TwitterUser[]>(
+    `/users/by?usernames=${unknownNames.join()}&user.fields=profile_image_url,location`
   );
 
   const newUsers = mapTwitterToUsers(data);

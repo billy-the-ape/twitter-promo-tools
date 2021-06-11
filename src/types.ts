@@ -33,6 +33,12 @@ export type Tweet = {
 export type CampaignPermissions = {
   canDelete: boolean;
   canEdit: boolean;
+  canTweet: boolean;
+};
+
+export type SubmittedTweet = {
+  id: string;
+  authorId: string;
 };
 
 export type Campaign = {
@@ -45,6 +51,8 @@ export type Campaign = {
   users?: User[];
   tweetCount?: number;
   permissions?: CampaignPermissions;
+
+  submittedTweets?: SubmittedTweet[];
   // tweets?: Tweet[];
 
   _id?: ObjectId | null;
@@ -60,4 +68,5 @@ export type Campaign = {
 export type CollectionTypeMap = {
   users: User;
   campaigns: Campaign;
+  tweets: SubmittedTweet;
 };

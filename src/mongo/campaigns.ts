@@ -1,19 +1,27 @@
 import { Campaign } from '@/types';
 import { FilterQuery, ObjectId } from 'mongodb';
 
-import { getCollection } from './util';
+import { getCollection, getUserCampaignPermissions } from './util';
 
 export const upsertCampaign = async (userId: string, campaign: Campaign) => {
-  const collection = await getCollection('campaigns');
+  const { canEdit } = getUserCampaignPermissions(userId, campaign);
 
   const {
-    // Remove fields that are set on insert
+    // Remove fields that are set on insert or aggregations
     _id,
     dateAdded: _,
     creator: _0,
     permissions: _1,
+    users: _2,
     ...updateData
   } = campaign;
+
+  // Deny user without edit rights on existing campaigns
+  if (!canEdit && _id) {
+    return false;
+  }
+
+  const collection = await getCollection('campaigns');
 
   const { upsertedId } = await collection.updateOne(
     {
@@ -28,7 +36,7 @@ export const upsertCampaign = async (userId: string, campaign: Campaign) => {
     }
   );
 
-  return upsertedId;
+  return upsertedId || _id;
 };
 
 export const deleteCampaigns = async (userId: string, ids: ObjectId[]) => {
@@ -95,16 +103,9 @@ export const getCampaigns = async (
     ])
     .toArray();
 
-  console.log(result[4]?.users);
-
   return result.map((campaign) => ({
     ...campaign,
-    permissions: {
-      canEdit:
-        campaign.creator === userId ||
-        !!campaign.managers?.find(({ id }) => id === userId),
-      canDelete: campaign.creator === userId,
-    },
+    permissions: getUserCampaignPermissions(userId, campaign),
   }));
 };
 
@@ -118,4 +119,51 @@ export const getCampaignsForUser = async (
       { influencers: { $elemMatch: { id: userId } } },
     ],
   });
+};
+
+export const addTweetToCampaign = async (
+  tweetId: string,
+  campaignId: string,
+  userId: string
+) => {
+  const campaigns = await getCampaigns(userId, {
+    _id: new ObjectId(campaignId),
+  });
+
+  // Campaign doesn't exist
+  if (!campaigns.length) {
+    return 404;
+  }
+
+  const [campaign] = campaigns;
+  const { _id, submittedTweets = [] } = campaign;
+
+  const { canTweet } = getUserCampaignPermissions(userId, campaign);
+
+  // User isn't an influencer on the campaign
+  if (!canTweet) {
+    return 403;
+  }
+
+  const collection = await getCollection('campaigns');
+  const tweetCollection = await getCollection('tweets');
+
+  const existingTweet = await tweetCollection.findOne({ id: tweetId });
+
+  // Tweet is already submitted
+  if (existingTweet !== null) {
+    return 409;
+  }
+
+  const newTweet = {
+    id: tweetId,
+    authorId: userId,
+  };
+
+  tweetCollection.insertOne(newTweet);
+  submittedTweets.push(newTweet);
+
+  await collection.updateOne({ _id }, { $set: { submittedTweets } });
+
+  return 204;
 };

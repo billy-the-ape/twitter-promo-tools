@@ -26,8 +26,13 @@
 	"sign_in": "Sign in",
 	"sign_out": "Sign out",
 	"start_date": "Start Date",
+	"submit_tweet": "Submit Tweet",
+	"submit_tweet_full": "Paste Link to Tweet for {{name}}",
 	"title": "Twitter Promo Tools",
 	"title_mobile": "Promo Tools",
 	"todos": "Todos",
-	"tweet_count": "Tweet Count"
+	"tweet_already_submitted": "Tweet was already submitted.",
+	"tweet_count": "Tweet Count",
+	"tweet_submitted": "Tweet Submitted.",
+	"tweet_wrong_user": "You cannot submit another user's tweet"
 }

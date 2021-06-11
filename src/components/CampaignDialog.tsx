@@ -1,6 +1,6 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
-import { userDateFormatString } from '@/util';
+import { getFullUserData, userDateFormatString } from '@/util';
 import dateFns from '@date-io/date-fns';
 import {
   Box,
@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogProps,
   DialogTitle,
-  Divider,
   TextField,
   makeStyles,
 } from '@material-ui/core';
@@ -133,12 +132,16 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
             </Box>
             <UserMultiselect
               label={t('add_promoters')}
-              users={campaign?.influencers}
+              users={campaign?.influencers?.map(
+                (u) => getFullUserData(u, campaign.users)!
+              )}
               onUsersSelected={(influencers) => handleChange({ influencers })}
             />
             <UserMultiselect
               label={t('add_managers')}
-              users={campaign?.managers}
+              users={campaign?.managers?.map(
+                (u) => getFullUserData(u, campaign.users)!
+              )}
               onUsersSelected={(managers) => handleChange({ managers })}
             />
           </Box>

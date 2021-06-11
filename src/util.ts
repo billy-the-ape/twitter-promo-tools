@@ -69,3 +69,23 @@ export const formatDate = (
 
 export const getFullUserData = ({ id: findId }: UserBase, users?: User[]) =>
   users?.find(({ id }) => id === findId);
+
+export const fetchTwitterApi = async <
+  TResponse extends Record<string, any> | Record<string, any>[] = Record<
+    string,
+    any
+  >[]
+>(
+  url: string,
+  defaultData?: TResponse
+): Promise<TResponse> => {
+  const { data = defaultData } = await fetchJson(
+    `https://api.twitter.com/2${url}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.TWITTER_BEARER}`,
+      },
+    }
+  );
+  return data as TResponse;
+};

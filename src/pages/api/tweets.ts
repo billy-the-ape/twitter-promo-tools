@@ -3,7 +3,13 @@ import { getSession } from 'next-auth/client';
 
 const handler: NextApiHandler = async (req, res) => {
   const session = await getSession({ req });
-  console.log({ session });
+
+  switch (req.method) {
+    case 'POST':
+      break;
+    case 'GET':
+      break;
+  }
 
   res.status(200).json({});
 };

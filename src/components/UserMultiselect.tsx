@@ -3,13 +3,13 @@ import { fetchJson, noop } from '@/util';
 import { Avatar, Box, Chip, Grid, TextField } from '@material-ui/core';
 import { useState } from 'react';
 
-export type TwitterAdderProps = {
+export type UserMultiselectProps = {
   label: string;
   users?: User[];
   onUsersSelected: (users: User[]) => void;
 };
 
-const UserMultiselect: React.FC<TwitterAdderProps> = ({
+const UserMultiselect: React.FC<UserMultiselectProps> = ({
   label,
   users = [],
   onUsersSelected,
@@ -17,7 +17,7 @@ const UserMultiselect: React.FC<TwitterAdderProps> = ({
   const [text, setText] = useState('');
   const [fullUsers, setFullUsers] = useState<User[]>(users);
   const [handles, setHandles] = useState<string[]>(
-    users.map(({ screenName }) => screenName!)
+    users.map(({ screenName } = {} as any) => screenName!)
   );
   const [missingHandles, setMissingHandles] = useState<string[]>([]);
 
@@ -64,7 +64,7 @@ const UserMultiselect: React.FC<TwitterAdderProps> = ({
     }
 
     if (missingHandles.length < handles.length || handles.length === 0) {
-      onUsersSelected(allUsers);
+      onUsersSelected(allUsers.filter((u) => !!u) as User[]);
     }
   };
 
@@ -89,6 +89,8 @@ const UserMultiselect: React.FC<TwitterAdderProps> = ({
       <Box mt={2}>
         <Grid container spacing={1}>
           {handles.map((str) => {
+            if (!str) return null;
+
             const twitterUser = fullUsers.find(
               ({ screenName }) =>
                 screenName?.toLocaleLowerCase() === str.toLocaleLowerCase()
