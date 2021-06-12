@@ -1,10 +1,10 @@
 import {
-  Accordion,
   AccordionDetails,
   AccordionProps,
   AccordionSummary,
   Badge,
   Box,
+  Paper,
   Typography,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -15,6 +15,7 @@ export type SectionProps = AccordionProps & {
   titleAdornment?: ReactNode;
   className?: string;
   badgeNumber?: number;
+  expandDisabled?: boolean;
 };
 
 const Section: React.FC<SectionProps> = ({
@@ -25,36 +26,14 @@ const Section: React.FC<SectionProps> = ({
   badgeNumber = 0,
   ...rest
 }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-
   return (
-    <Accordion
-      defaultExpanded
-      {...rest}
-      onChange={(_, expanded) => {
-        setIsExpanded(expanded);
-        rest.onChange && rest.onChange(_, expanded);
-      }}
-      className={className}
-    >
-      <AccordionSummary
-        expandIcon={
-          <Badge
-            badgeContent={badgeNumber}
-            color="secondary"
-            invisible={isExpanded || badgeNumber === 0}
-          >
-            <ExpandMoreIcon />
-          </Badge>
-        }
-      >
-        <Box width="100%" display="flex" justifyContent="space-between">
-          <Typography variant="h6">{title}</Typography>
-          {isExpanded && titleAdornment}
-        </Box>
-      </AccordionSummary>
-      <AccordionDetails>{children}</AccordionDetails>
-    </Accordion>
+    <Paper className={className}>
+      <Box p={2} width="100%" display="flex" justifyContent="space-between">
+        <Typography variant="h6">{title}</Typography>
+        <Box flex="1">{titleAdornment}</Box>
+      </Box>
+      <Box p={2}>{children}</Box>
+    </Paper>
   );
 };
 export default Section;

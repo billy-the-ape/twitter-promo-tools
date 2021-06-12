@@ -45,6 +45,46 @@ export const userDateFormatString = (() => {
     .join('');
 })();
 
+export const formatDateSince = (date?: Date | string | null) => {
+  if (!date) {
+    return '';
+  }
+  const diff = new Date(date).getTime() - Date.now();
+  const min = 1000 * 60;
+  const hour = min * 60;
+  const day = hour * 24;
+  const week = day * 7;
+  const month = week * 4;
+  const year = month * 12;
+
+  const rtf1 = new Intl.RelativeTimeFormat(window.navigator.language);
+  const absDiff = Math.abs(diff);
+
+  if (absDiff > year) {
+    return rtf1.format(Math.ceil(diff / year), 'year');
+    // just days
+  } else if (absDiff > month) {
+    return rtf1.format(Math.ceil(diff / month), 'month');
+    // just days
+  } else if (absDiff > week) {
+    return rtf1.format(Math.ceil(diff / week), 'week');
+    // just days
+  } else if (absDiff > day) {
+    const leftover = diff % day;
+    return rtf1.format(Math.ceil(diff / day), 'day');
+    // days + hours
+  } else if (absDiff > hour) {
+    // hours
+    return rtf1.format(Math.ceil(diff / hour), 'hour');
+  } else if (absDiff > min) {
+    // mins
+    return rtf1.format(Math.ceil(diff / min), 'minute');
+  } else {
+    // secs
+    return rtf1.format(Math.ceil(diff / 1000), 'second');
+  }
+};
+
 export const formatDate = (
   date?: Date | string | null,
   unknownString: string = 'Unknown'

@@ -13,6 +13,7 @@ export const upsertCampaign = async (userId: string, campaign: Campaign) => {
     creator: _0,
     permissions: _1,
     users: _2,
+    submittedTweets: _3, // These should be updated only with `addTweetToCampaign`
     ...updateData
   } = campaign;
 
@@ -103,21 +104,53 @@ export const getCampaigns = async (
     ])
     .toArray();
 
-  return result.map((campaign) => ({
-    ...campaign,
-    permissions: getUserCampaignPermissions(userId, campaign),
-  }));
+  return result.map((campaign) => {
+    const permissions = getUserCampaignPermissions(userId, campaign);
+    let { submittedTweets } = campaign;
+
+    // Those with edit rights can see all tweets
+    if (!permissions.canEdit) {
+      submittedTweets = submittedTweets?.filter(
+        ({ authorId }) => authorId === userId
+      );
+    }
+    submittedTweets?.sort(
+      ({ createdAt: createdAtA }, { createdAt: createdAtB }) =>
+        createdAtB?.getTime() ?? 0 - createdAtA?.getTime() ?? 0
+    );
+
+    return {
+      ...campaign,
+      submittedTweets,
+      permissions,
+    };
+  });
 };
 
 export const getCampaignsForUser = async (
-  userId: string
+  userId: string,
+  searchText?: string
 ): Promise<Campaign[]> => {
+  const search = searchText
+    ? {
+        $search: {
+          index: 'campaignSearch',
+          text: {
+            query: searchText,
+            path: {
+              wildcard: '*',
+            },
+          },
+        },
+      }
+    : {};
   return await getCampaigns(userId, {
     $or: [
       { creator: userId },
       { managers: { $elemMatch: { id: userId } } },
       { influencers: { $elemMatch: { id: userId } } },
     ],
+    ...search,
   });
 };
 

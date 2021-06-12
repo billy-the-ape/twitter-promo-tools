@@ -1,6 +1,5 @@
 import CampaignList from '@/components/CampaignList';
 import Header from '@/components/Header';
-import TodoList from '@/components/TodoList';
 import { TRANSLATION_NAMESPACE } from '@/constants';
 import { useIsLoggedIn } from '@/hooks/useIsLoggedIn';
 import { Box, Container, CssBaseline } from '@material-ui/core';
@@ -23,7 +22,6 @@ const Home: React.FC = () => {
       {isLoggedIn && (
         <Container>
           <Box pt={5}>
-            <TodoList />
             <CampaignList />
           </Box>
         </Container>

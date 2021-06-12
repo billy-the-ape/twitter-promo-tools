@@ -7,12 +7,25 @@ const handler: NextApiHandler = async (req, res) => {
   try {
     const session = (await getSession({ req })) as Session;
 
-    switch (req.method) {
+    const {
+      body,
+      method,
+      query: { search },
+    } = req;
+
+    switch (method) {
       case 'GET':
-        res.status(200).json(await getCampaignsForUser(session.user.id));
+        res
+          .status(200)
+          .json(
+            await getCampaignsForUser(
+              session.user.id,
+              typeof search === 'string' ? search : undefined
+            )
+          );
         return;
       case 'POST':
-        const campaign = JSON.parse(req.body) as Campaign;
+        const campaign = JSON.parse(body) as Campaign;
         const result = await upsertCampaign(session.user.id, campaign);
 
         if (!result) {

@@ -27,12 +27,16 @@ const handler: NextApiHandler = async (req, res) => {
 
       // Check tweet exists
       if (!tweetResult || !tweetResult.length || Array.isArray(id)) {
+        console.error('TWEET NOT FOUND');
         res.status(404).send({});
         return;
       }
 
-      const campaigns = await getCampaigns(session.user.id, { id });
+      const campaigns = await getCampaigns(session.user.id, {
+        _id: new ObjectId(id),
+      });
       if (!campaigns || !campaigns.length) {
+        console.error('CAMPAIGN NOT FOUND');
         res.status(404).send({});
         return;
       }

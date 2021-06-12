@@ -1,6 +1,6 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
-import { formatDate, getFullUserData } from '@/util';
+import { formatDate, formatDateSince, getFullUserData } from '@/util';
 import {
   Accordion,
   AccordionDetails,
@@ -10,7 +10,7 @@ import {
   Button,
   Divider,
   Hidden,
-  IconButton,
+  ListItemIcon,
   TextField,
   Tooltip,
   Typography,
@@ -27,7 +27,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
-const useStyles = makeStyles(({ spacing, palette }) => ({
+import Menu from './MenuWithTrigger';
+
+const useStyles = makeStyles(({ breakpoints, spacing, palette }) => ({
   campaignItemRoot: {
     backgroundColor: palette.background.default,
   },
@@ -35,12 +37,21 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     margin: spacing(0, 1),
   },
   summaryContent: {
-    maxWidth: 'calc(100% - 36px)',
+    maxWidth: '100%',
+    [breakpoints.up('sm')]: {
+      maxWidth: 'calc(100% - 36px)',
+    },
+  },
+  summaryRoot: {
+    justifyContent: 'space-between',
   },
   submitText: {
-    width: '80%',
     alignSelf: 'center',
     margin: spacing(1),
+    [breakpoints.up('sm')]: {
+      margin: spacing(0, 5),
+      width: '80%',
+    },
   },
   submitButton: {
     height: '100%',
@@ -77,7 +88,6 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
 
   const handleTweetSubmit = async () => {
     const match = TWEET_LINK_REGEX.exec(tweetLink);
-    console.log({ match });
     if (!match) {
       setIsTweetLinkError(true);
       return;
@@ -110,83 +120,109 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
     }
   };
 
+  const tweetString = campaign.submittedTweets && campaign.submittedTweets.length ? 
+  t('count_of_num_tweets', {
+    count: campaign.submittedTweets.length,
+    num: campaign.tweetCount
+  }) : t('num_tweets', {
+    num: campaign.tweetCount
+  });
+
   return (
-    <>
-      {submitTweet && (
-        <TextField
-          className={classes.submitText}
-          label={t('submit_tweet_full', { name: campaign.name })}
-          autoFocus
-          error={isTweetLinkError}
-          variant="outlined"
-          value={tweetLink}
-          onChange={({ target: { value } }) => setTweetLink(value)}
-          InputProps={{
-            endAdornment: (
-              <Button
-                className={classes.submitButton}
-                variant="contained"
-                color="primary"
-                disabled={!tweetLink}
-                onClick={handleTweetSubmit}
-              >
-                <AddIcon />
-              </Button>
-            ),
-          }}
-        />
-      )}
-      <Accordion
-        className={classes.campaignItemRoot}
-        onChange={(_, expanded) => setIsExpanded(expanded)}
+    <Accordion
+      className={classes.campaignItemRoot}
+      onChange={(_, expanded) => setIsExpanded(expanded)}
+    >
+      <AccordionSummary
+        classes={{ root: classes.summaryRoot, content: classes.summaryContent }}
+        expandIcon={
+          !isMobile && (
+            <Tooltip
+              title={isExpanded ? String(t('collapse')) : String(t('expand'))}
+            >
+              <ExpandMoreIcon />
+            </Tooltip>
+          )
+        }
       >
-        <AccordionSummary
-          classes={{ content: classes.summaryContent }}
-          expandIcon={
-            campaign.description && (
-              <Tooltip
-                title={isExpanded ? String(t('collapse')) : String(t('expand'))}
-              >
-                <ExpandMoreIcon />
-              </Tooltip>
-            )
-          }
+        <Box
+          width="100%"
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
         >
-          <Box
-            width="100%"
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          {(!isExpanded || !isMobile) && !(isMobile && submitTweet) && (
             <Box
-              maxWidth={isMobile ? '60%' : '50%'}
+              maxWidth={isMobile ? '50%' : '40%'}
               display="flex"
               alignItems="center"
             >
-              {(!isExpanded || !isMobile) && (
-                <Typography className={classes.spaced} variant="body1" noWrap>
-                  {campaign.name}
-                </Typography>
-              )}
+              <Typography className={classes.spaced} variant="body1" noWrap>
+                {campaign.name}
+              </Typography>
             </Box>
+          )}
+          {submitTweet && (
+            <TextField
+              className={classes.submitText}
+              label={t('submit_tweet_full')}
+              autoFocus
+              error={isTweetLinkError}
+              variant="outlined"
+              value={tweetLink}
+              onClick={(e) => e.stopPropagation()}
+              onChange={({ target: { value } }) => setTweetLink(value)}
+              InputProps={{
+                endAdornment: (
+                  <Button
+                    className={classes.submitButton}
+                    variant="contained"
+                    color="primary"
+                    disabled={!tweetLink}
+                    onClick={handleTweetSubmit}
+                  >
+                    <AddIcon />
+                  </Button>
+                ),
+              }}
+            />
+          )}
+          {!submitTweet && (
             <Box display="flex" alignItems="center">
               <Hidden smDown>
-                <Box display="flex" alignItems="center" mr={1}>
-                  {campaign.tweetCount && (
+                <Box display="flex" flexDirection="column" alignItems="center" mr={3}>
+                  <Box display="flex" alignItems="center" mr={1}>
+                    {campaign.tweetCount && (
+                      <Typography variant="caption">
+                        {tweetString}
+                      </Typography>
+                    )}
+                    {(campaign.startDate || campaign.endDate) && (
+                      <Box>
+                        <Typography
+                          className={classes.spaced}
+                          variant="caption"
+                        >
+                          {formatDate(campaign.startDate)}
+                        </Typography>
+                        -
+                        <Typography
+                          className={classes.spaced}
+                          variant="caption"
+                        >
+                          {formatDate(campaign.endDate)}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                  {campaign.submittedTweets && campaign.submittedTweets.length && (
                     <Typography variant="caption">
-                      {campaign.tweetCount} Tweets
+                      {t('time_since_last_tweet', {
+                        timeSince: formatDateSince(
+                          campaign.submittedTweets[0].createdAt
+                        ),
+                      })}
                     </Typography>
-                  )}
-                  {(campaign.startDate || campaign.endDate) && (
-                    <Box>
-                      <Typography className={classes.spaced} variant="caption">
-                        {formatDate(campaign.startDate)}
-                      </Typography>
-                      -
-                      <Typography className={classes.spaced} variant="caption">
-                        {formatDate(campaign.endDate)}
-                      </Typography>
-                    </Box>
                   )}
                 </Box>
               </Hidden>
@@ -205,114 +241,117 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                   </AvatarGroup>
                 </Hidden>
               )}
-              <Divider orientation="vertical" />
               {/* CAMPAIGN ACTIONS!! */}
-              {campaign.permissions?.canTweet && (
-                <Tooltip title={String(t('submit_tweet'))}>
-                  <IconButton
-                    aria-label={t('submit_tweet')}
+              <Menu id={`menu-${campaign._id}`}>
+                {campaign.permissions?.canTweet && (
+                  <Menu.Item
                     onClick={(e) => {
                       e.stopPropagation();
                       setSubmitTweet(!submitTweet);
                     }}
                   >
-                    <TwitterIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-              {setEditCampaign && campaign.permissions?.canEdit && (
-                <Tooltip title={String(t('edit'))}>
-                  <IconButton
-                    aria-label={t('edit')}
+                    <ListItemIcon>
+                      <TwitterIcon fontSize="small" />
+                    </ListItemIcon>
+                    <Typography variant="inherit">
+                      {t('submit_tweet')}
+                    </Typography>
+                  </Menu.Item>
+                )}
+                {setEditCampaign && campaign.permissions?.canEdit && (
+                  <Menu.Item
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditCampaign(campaign);
                     }}
                   >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
-              {setDeleteCampaign && campaign.permissions?.canDelete && (
-                <Tooltip title={String(t('delete'))}>
-                  <IconButton
-                    aria-label={t('delete')}
+                    <ListItemIcon>
+                      <EditIcon fontSize="small" />
+                    </ListItemIcon>
+                    <Typography variant="inherit">{t('edit')}</Typography>
+                  </Menu.Item>
+                )}
+                {setDeleteCampaign && campaign.permissions?.canDelete && (
+                  <Menu.Item
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeleteCampaign(campaign);
                     }}
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
+                    <ListItemIcon>
+                      <DeleteIcon fontSize="small" />
+                    </ListItemIcon>
+                    <Typography variant="inherit">{t('delete')}</Typography>
+                  </Menu.Item>
+                )}
+              </Menu>
             </Box>
-          </Box>
-        </AccordionSummary>
-        {campaign.description && (
-          // ACCORDION DETAILS!!
-          <AccordionDetails>
-            <Box
-              display="flex"
-              width="100%"
-              flexDirection="column"
-              maxHeight="300px"
-              overflow="auto"
-            >
-              {isMobile && (
-                <>
-                  <Typography variant="body1">{campaign.name}</Typography>
-                  <Divider />
-                </>
-              )}
-              <Hidden mdUp>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-around"
-                >
-                  {campaign.tweetCount && (
-                    <Typography variant="caption">
-                      {campaign.tweetCount} Tweets
-                    </Typography>
-                  )}
-                  {(campaign.startDate || campaign.endDate) && (
-                    <div>
-                      <Typography className={classes.spaced} variant="caption">
-                        {formatDate(campaign.startDate)}
-                      </Typography>
-                      -
-                      <Typography className={classes.spaced} variant="caption">
-                        {formatDate(campaign.endDate)}
-                      </Typography>
-                    </div>
-                  )}
-                  {campaign.influencers && campaign.influencers.length && (
-                    <Hidden smUp>
-                      <AvatarGroup spacing="small" max={3}>
-                        {campaign.influencers.map((u) => {
-                          const { screenName, image } =
-                            getFullUserData(u, campaign.users!) ?? {};
-                          return (
-                            <Avatar key={screenName} src={image!}>
-                              {screenName?.substring(0, 1).toLocaleUpperCase()}
-                            </Avatar>
-                          );
-                        })}
-                      </AvatarGroup>
-                    </Hidden>
-                  )}
-                </Box>
+          )}
+        </Box>
+      </AccordionSummary>
+      {campaign.description && (
+        // ACCORDION DETAILS!!
+        <AccordionDetails>
+          <Box
+            display="flex"
+            width="100%"
+            flexDirection="column"
+            maxHeight="300px"
+            overflow="auto"
+          >
+            {isMobile && (
+              <>
+                <Typography variant="body1">{campaign.name}</Typography>
                 <Divider />
-              </Hidden>
-              {campaign.description.split('\n').map((desc, i) => (
-                <ReactMarkdown key={i}>{desc}</ReactMarkdown>
-              ))}
-            </Box>
-          </AccordionDetails>
-        )}
-      </Accordion>
-    </>
+              </>
+            )}
+            <Hidden mdUp>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-around"
+              >
+                {campaign.tweetCount && (
+                  <Typography variant="caption">
+                    {campaign.tweetCount} Tweets
+                  </Typography>
+                )}
+                {(campaign.startDate || campaign.endDate) && (
+                  <div>
+                    <Typography className={classes.spaced} variant="caption">
+                      {formatDate(campaign.startDate)}
+                    </Typography>
+                    -
+                    <Typography className={classes.spaced} variant="caption">
+                      {formatDate(campaign.endDate)}
+                    </Typography>
+                  </div>
+                )}
+                {campaign.influencers && campaign.influencers.length && (
+                  <Hidden smUp>
+                    <AvatarGroup spacing="small" max={3}>
+                      {campaign.influencers.map((u) => {
+                        const { screenName, image } =
+                          getFullUserData(u, campaign.users!) ?? {};
+                        return (
+                          <Avatar key={screenName} src={image!}>
+                            {screenName?.substring(0, 1).toLocaleUpperCase()}
+                          </Avatar>
+                        );
+                      })}
+                    </AvatarGroup>
+                  </Hidden>
+                )}
+              </Box>
+              <Divider />
+            </Hidden>
+            {campaign.description.split('\n').map((desc, i) => (
+              <ReactMarkdown key={i}>{desc}</ReactMarkdown>
+            ))}
+          </Box>
+        </AccordionDetails>
+      )}
+    </Accordion>
   );
 };
 
