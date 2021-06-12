@@ -102,6 +102,9 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
       case 409:
         enqueueSnackbar(t('tweet_already_submitted'), { variant: 'error' });
         break;
+      case 418:
+        enqueueSnackbar(t('user_not_influencer'), { variant: 'error' });
+        break;
       default:
         enqueueSnackbar(t('an_error_occurred'), { variant: 'error' });
     }

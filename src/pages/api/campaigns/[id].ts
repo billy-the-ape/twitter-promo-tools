@@ -18,11 +18,11 @@ const handler: NextApiHandler = async (req, res) => {
 
   switch (req.method) {
     // Method indicating a user is submitting a tweet to this campaign
-    case 'POST':
+    case 'POST': {
       const tweetIds = JSON.parse(req.body) as string[];
 
       const tweetResult = await fetchTwitterApi(
-        `/tweets?ids=${tweetIds.join()}&expansions=author_id`
+        `/tweets?ids=${tweetIds.join()}&expansions=author_id&tweet.fields=created_at`
       );
 
       // Check tweet exists
@@ -31,15 +31,28 @@ const handler: NextApiHandler = async (req, res) => {
         return;
       }
 
-      // Check tweet is from current user
-      const [{ author_id: authorId }] = tweetResult;
-      if (authorId !== session.user.id) {
+      const campaigns = await getCampaigns(session.user.id, { id });
+      if (!campaigns || !campaigns.length) {
+        res.status(404).send({});
+        return;
+      }
+      const [campaign] = campaigns;
+
+      // Check tweet is from current user or manager
+      const [{ author_id: authorId, created_at: createdAt }] = tweetResult;
+      if (authorId !== session.user.id && !campaign.permissions?.canEdit) {
         res.status(400).send({});
         return;
       }
 
       for (const tid of tweetIds) {
-        const result = await addTweetToCampaign(tid, id, authorId);
+        const result = await addTweetToCampaign(
+          tid,
+          campaign,
+          authorId,
+          session.user.id,
+          new Date(createdAt)
+        );
 
         if (result !== 204) {
           res.status(result).send({});
@@ -49,7 +62,8 @@ const handler: NextApiHandler = async (req, res) => {
 
       res.status(204).send({});
       return;
-    case 'DELETE':
+    }
+    case 'DELETE': {
       const deleteSuccess = await deleteCampaigns(session.user.id, idsArray);
       if (deleteSuccess) {
         res.status(204).send({});
@@ -57,11 +71,13 @@ const handler: NextApiHandler = async (req, res) => {
         res.status(403).send({});
       }
       return;
-    case 'GET':
+    }
+    case 'GET': {
       const campaigns = await getCampaigns(session.user.id, {
         _id: { $in: idsArray },
       });
       res.status(200).json(campaigns);
+    }
   }
 };
 

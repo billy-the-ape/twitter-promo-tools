@@ -1,4 +1,4 @@
-import { Campaign } from '@/types';
+import { Campaign, SubmittedTweet } from '@/types';
 import { FilterQuery, ObjectId } from 'mongodb';
 
 import { getCollection, getUserCampaignPermissions } from './util';
@@ -122,42 +122,44 @@ export const getCampaignsForUser = async (
 };
 
 export const addTweetToCampaign = async (
-  tweetId: string,
-  campaignId: string,
-  userId: string
+  id: string,
+  campaign: Campaign,
+  authorId: string,
+  userId: string,
+  createdAt: Date
 ) => {
-  const campaigns = await getCampaigns(userId, {
-    _id: new ObjectId(campaignId),
-  });
-
-  // Campaign doesn't exist
-  if (!campaigns.length) {
-    return 404;
-  }
-
-  const [campaign] = campaigns;
   const { _id, submittedTweets = [] } = campaign;
 
-  const { canTweet } = getUserCampaignPermissions(userId, campaign);
+  const { canTweet, canEdit } = campaign.permissions || {};
 
-  // User isn't an influencer on the campaign
-  if (!canTweet) {
+  // User isn't a manager or influencer on the campaign
+  if (!canTweet && !canEdit) {
     return 403;
   }
 
   const collection = await getCollection('campaigns');
   const tweetCollection = await getCollection('tweets');
 
-  const existingTweet = await tweetCollection.findOne({ id: tweetId });
+  const existingTweet = await tweetCollection.findOne({ id });
 
-  // Tweet is already submitted
-  if (existingTweet !== null) {
+  // Tweet is already submitted and not a manager
+  if (existingTweet !== null && !canEdit) {
     return 409;
   }
 
-  const newTweet = {
-    id: tweetId,
-    authorId: userId,
+  // Semi rare case where manager or owner submits a user's tweet
+  // make sure the author is an influencer on the project
+  if (
+    userId !== authorId &&
+    !campaign.influencers?.some(({ id }) => id === authorId)
+  ) {
+    return 418; // I'm a teapot
+  }
+
+  const newTweet: SubmittedTweet = {
+    id,
+    authorId,
+    createdAt,
   };
 
   tweetCollection.insertOne(newTweet);

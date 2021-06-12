@@ -39,6 +39,7 @@ export type CampaignPermissions = {
 export type SubmittedTweet = {
   id: string;
   authorId: string;
+  createdAt: Date;
 };
 
 export type Campaign = {

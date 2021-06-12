@@ -34,5 +34,6 @@
 	"tweet_already_submitted": "Tweet was already submitted.",
 	"tweet_count": "Tweet Count",
 	"tweet_submitted": "Tweet Submitted.",
-	"tweet_wrong_user": "You cannot submit another user's tweet"
+	"tweet_wrong_user": "You cannot submit another user's tweet",
+	"user_not_influencer": "Tweet author is not an influencer for that campaign."
 }
