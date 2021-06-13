@@ -6,12 +6,12 @@ export const getUserCampaignPermissions = (
   userId: string,
   campaign: Campaign
 ): CampaignPermissions => ({
-  canEdit:
+  manager:
     (campaign.creator === userId ||
       campaign.managers?.some(({ id }) => id === userId)) ??
     false,
-  canDelete: campaign.creator === userId,
-  canTweet: campaign.influencers?.some(({ id }) => id === userId) ?? false,
+  owner: campaign.creator === userId,
+  influencer: campaign.influencers?.some(({ id }) => id === userId) ?? false,
 });
 
 // Create cached connection variable

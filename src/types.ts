@@ -31,9 +31,9 @@ export type Tweet = {
 };
 
 export type CampaignPermissions = {
-  canDelete: boolean;
-  canEdit: boolean;
-  canTweet: boolean;
+  owner: boolean;
+  manager: boolean;
+  influencer: boolean;
 };
 
 export type SubmittedTweet = {

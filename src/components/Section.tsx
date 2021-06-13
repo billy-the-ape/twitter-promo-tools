@@ -30,7 +30,7 @@ const Section: React.FC<SectionProps> = ({
     <Paper className={className}>
       <Box p={2} width="100%" display="flex" justifyContent="space-between">
         <Typography variant="h6">{title}</Typography>
-        <Box flex="1">{titleAdornment}</Box>
+        {titleAdornment}
       </Box>
       <Box p={2}>{children}</Box>
     </Paper>

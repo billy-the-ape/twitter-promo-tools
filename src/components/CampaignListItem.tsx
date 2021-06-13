@@ -10,6 +10,8 @@ import {
   Button,
   Divider,
   Hidden,
+  IconButton,
+  Link,
   ListItemIcon,
   TextField,
   Tooltip,
@@ -17,13 +19,15 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import CancelIcon from '@material-ui/icons/Cancel';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import TwitterIcon from '@material-ui/icons/Twitter';
 import { AvatarGroup } from '@material-ui/lab';
+import { useSession } from 'next-auth/client';
 import { useSnackbar } from 'notistack';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
@@ -35,6 +39,7 @@ const useStyles = makeStyles(({ breakpoints, spacing, palette }) => ({
   },
   spaced: {
     margin: spacing(0, 1),
+    maxWidth: spacing(13),
   },
   summaryContent: {
     maxWidth: '100%',
@@ -60,11 +65,23 @@ const useStyles = makeStyles(({ breakpoints, spacing, palette }) => ({
     borderRadius: '4px',
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
+    padding: '7px 16px',
+  },
+  linkAvatar: {
+    height: spacing(3),
+    width: spacing(3),
+    marginRight: spacing(1),
+  },
+  linkBox: {
+    [breakpoints.down('sm')]: {
+      justifyContent: 'space-around',
+    },
   },
 }));
 
 export type CampaignListItemProps = {
   campaign: Campaign;
+  mutate: () => void;
   setEditCampaign?: (c: Campaign) => void;
   setDeleteCampaign?: (c: Campaign) => void;
 };
@@ -74,14 +91,17 @@ const TWEET_LINK_REGEX =
 
 const CampaignListItem: React.FC<CampaignListItemProps> = ({
   campaign,
+  mutate,
   setEditCampaign,
   setDeleteCampaign,
 }) => {
+  const [{ user }] = useSession() as any;
   const classes = useStyles();
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [submitTweet, setSubmitTweet] = useState(false);
   const [isTweetLinkError, setIsTweetLinkError] = useState(false);
+  const [showTweets, setShowTweets] = useState(false);
   const [tweetLink, setTweetLink] = useState('');
   const isMobile = useIsMobile();
   const { enqueueSnackbar } = useSnackbar();
@@ -105,6 +125,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
         enqueueSnackbar(t('tweet_submitted'), { variant: 'success' });
         setTweetLink('');
         setSubmitTweet(false);
+        mutate();
         break;
       case 400:
         enqueueSnackbar(t('tweet_wrong_user'), { variant: 'error' });
@@ -120,18 +141,58 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
     }
   };
 
-  const tweetString = campaign.submittedTweets && campaign.submittedTweets.length ? 
-  t('count_of_num_tweets', {
-    count: campaign.submittedTweets.length,
-    num: campaign.tweetCount
-  }) : t('num_tweets', {
-    num: campaign.tweetCount
-  });
+  const handleTweetDelete = async (tweetId: string) => {
+    const { status } = await fetch(
+      `/api/campaigns/${campaign._id}/${tweetId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+
+    if (status === 204) {
+      enqueueSnackbar(t('tweet_deleted'), { variant: 'success' });
+      mutate();
+    } else {
+      enqueueSnackbar(t('an_error_occurred'), { variant: 'error' });
+    }
+  };
+
+  const myTweets = useMemo(
+    () =>
+      campaign.submittedTweets?.filter(({ authorId }) => authorId === user.id),
+    [campaign]
+  );
+
+  let tweetString = '';
+
+  if (myTweets && myTweets.length) {
+    if (campaign.tweetCount) {
+      tweetString = t('time_since_last_tweet_num', {
+        timeSince: formatDateSince(myTweets[0].createdAt),
+        count: myTweets.length,
+        num: campaign.tweetCount,
+      });
+    } else {
+      tweetString = t('time_since_last_tweet', {
+        timeSince: formatDateSince(myTweets[0].createdAt),
+        count: myTweets.length,
+      });
+    }
+  } else {
+    t('num_tweets', {
+      num: campaign.tweetCount,
+    });
+  }
 
   return (
     <Accordion
       className={classes.campaignItemRoot}
-      onChange={(_, expanded) => setIsExpanded(expanded)}
+      onChange={(_, expanded) => {
+        setIsExpanded(expanded);
+        if (!expanded) {
+          setShowTweets(false);
+        }
+      }}
     >
       <AccordionSummary
         classes={{ root: classes.summaryRoot, content: classes.summaryContent }}
@@ -151,81 +212,73 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
           justifyContent="space-between"
           alignItems="center"
         >
-          {(!isExpanded || !isMobile) && !(isMobile && submitTweet) && (
+          {!submitTweet && (
             <Box
               maxWidth={isMobile ? '50%' : '40%'}
               display="flex"
               alignItems="center"
             >
-              <Typography className={classes.spaced} variant="body1" noWrap>
+              <Typography variant="body1" noWrap>
                 {campaign.name}
               </Typography>
             </Box>
           )}
           {submitTweet && (
-            <TextField
-              className={classes.submitText}
-              label={t('submit_tweet_full')}
-              autoFocus
-              error={isTweetLinkError}
-              variant="outlined"
-              value={tweetLink}
-              onClick={(e) => e.stopPropagation()}
-              onChange={({ target: { value } }) => setTweetLink(value)}
-              InputProps={{
-                endAdornment: (
-                  <Button
-                    className={classes.submitButton}
-                    variant="contained"
-                    color="primary"
-                    disabled={!tweetLink}
-                    onClick={handleTweetSubmit}
-                  >
-                    <AddIcon />
-                  </Button>
-                ),
-              }}
-            />
+            <>
+              <TextField
+                className={classes.submitText}
+                label={t('submit_tweet_full')}
+                autoFocus
+                error={isTweetLinkError}
+                variant="outlined"
+                value={tweetLink}
+                size="small"
+                onClick={(e) => e.stopPropagation()}
+                onChange={({ target: { value } }) => setTweetLink(value)}
+                InputProps={{
+                  endAdornment: (
+                    <Button
+                      className={classes.submitButton}
+                      variant="contained"
+                      color="primary"
+                      disabled={!tweetLink}
+                      onClick={handleTweetSubmit}
+                    >
+                      <AddIcon />
+                    </Button>
+                  ),
+                }}
+              />
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSubmitTweet(false);
+                }}
+              >
+                <CancelIcon />
+              </IconButton>
+            </>
           )}
           {!submitTweet && (
             <Box display="flex" alignItems="center">
-              <Hidden smDown>
-                <Box display="flex" flexDirection="column" alignItems="center" mr={3}>
-                  <Box display="flex" alignItems="center" mr={1}>
-                    {campaign.tweetCount && (
-                      <Typography variant="caption">
-                        {tweetString}
-                      </Typography>
-                    )}
-                    {(campaign.startDate || campaign.endDate) && (
-                      <Box>
-                        <Typography
-                          className={classes.spaced}
-                          variant="caption"
-                        >
-                          {formatDate(campaign.startDate)}
-                        </Typography>
-                        -
-                        <Typography
-                          className={classes.spaced}
-                          variant="caption"
-                        >
-                          {formatDate(campaign.endDate)}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                  {campaign.submittedTweets && campaign.submittedTweets.length && (
-                    <Typography variant="caption">
-                      {t('time_since_last_tweet', {
-                        timeSince: formatDateSince(
-                          campaign.submittedTweets[0].createdAt
-                        ),
-                      })}
-                    </Typography>
-                  )}
+              {(campaign.startDate || campaign.endDate) && (
+                <Box mr={2}>
+                  <Typography
+                    className={classes.spaced}
+                    component="span"
+                    variant="body2"
+                    noWrap
+                  >
+                    {formatDate(campaign.startDate)} -{' '}
+                    {formatDate(campaign.endDate)}
+                  </Typography>
                 </Box>
-              </Hidden>
+              )}
+              {(!!campaign.tweetCount || !!myTweets?.length) && (
+                <Typography variant="caption" className={classes.spaced}>
+                  {tweetString}
+                </Typography>
+              )}
               {campaign.influencers && !!campaign.influencers.length && (
                 <Hidden xsDown>
                   <AvatarGroup spacing="small" max={5}>
@@ -243,7 +296,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
               )}
               {/* CAMPAIGN ACTIONS!! */}
               <Menu id={`menu-${campaign._id}`}>
-                {campaign.permissions?.canTweet && (
+                {campaign.permissions?.influencer && (
                   <Menu.Item
                     onClick={(e) => {
                       e.stopPropagation();
@@ -258,7 +311,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                     </Typography>
                   </Menu.Item>
                 )}
-                {setEditCampaign && campaign.permissions?.canEdit && (
+                {setEditCampaign && campaign.permissions?.manager && (
                   <Menu.Item
                     onClick={(e) => {
                       e.stopPropagation();
@@ -271,7 +324,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                     <Typography variant="inherit">{t('edit')}</Typography>
                   </Menu.Item>
                 )}
-                {setDeleteCampaign && campaign.permissions?.canDelete && (
+                {setDeleteCampaign && campaign.permissions?.owner && (
                   <Menu.Item
                     onClick={(e) => {
                       e.stopPropagation();
@@ -299,37 +352,15 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
             maxHeight="300px"
             overflow="auto"
           >
-            {isMobile && (
-              <>
-                <Typography variant="body1">{campaign.name}</Typography>
-                <Divider />
-              </>
-            )}
             <Hidden mdUp>
               <Box
                 display="flex"
                 alignItems="center"
                 justifyContent="space-around"
               >
-                {campaign.tweetCount && (
-                  <Typography variant="caption">
-                    {campaign.tweetCount} Tweets
-                  </Typography>
-                )}
-                {(campaign.startDate || campaign.endDate) && (
-                  <div>
-                    <Typography className={classes.spaced} variant="caption">
-                      {formatDate(campaign.startDate)}
-                    </Typography>
-                    -
-                    <Typography className={classes.spaced} variant="caption">
-                      {formatDate(campaign.endDate)}
-                    </Typography>
-                  </div>
-                )}
-                {campaign.influencers && campaign.influencers.length && (
+                {campaign.influencers && !!campaign.influencers.length && (
                   <Hidden smUp>
-                    <AvatarGroup spacing="small" max={3}>
+                    <AvatarGroup spacing="small" max={20}>
                       {campaign.influencers.map((u) => {
                         const { screenName, image } =
                           getFullUserData(u, campaign.users!) ?? {};
@@ -343,8 +374,54 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                   </Hidden>
                 )}
               </Box>
-              <Divider />
             </Hidden>
+            {campaign.submittedTweets && !!campaign.submittedTweets.length && (
+              /* TWEET LIST */
+              <Box mt={2}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => setShowTweets(!showTweets)}
+                >
+                  {showTweets
+                    ? t('hide_submitted_tweets')
+                    : t('show_submitted_tweets')}
+                </Button>
+                {showTweets && (
+                  <Box mt={2} display="flex" flexDirection="column">
+                    {campaign.submittedTweets.map(({ id, authorId }) => {
+                      const { screenName, image } =
+                        campaign.users?.find(({ id }) => id === authorId) || {};
+                      const link = `twitter.com/${screenName}/status/${id}`;
+                      return (
+                        <Box
+                          className={classes.linkBox}
+                          display="flex"
+                          alignItems="center"
+                        >
+                          <Avatar className={classes.linkAvatar} src={image!}>
+                            {screenName?.substr(0, 1).toLocaleUpperCase()}
+                          </Avatar>
+                          <Link href={`https://${link}`} target="_blank">
+                            <Typography variant="inherit">
+                              {isMobile ? `...${link.substring(14)}` : link}
+                            </Typography>
+                          </Link>
+                          <IconButton
+                            onClick={() => handleTweetDelete(id)}
+                            size="small"
+                          >
+                            <CancelIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+              </Box>
+            )}
+            <Divider />
+
             {campaign.description.split('\n').map((desc, i) => (
               <ReactMarkdown key={i}>{desc}</ReactMarkdown>
             ))}

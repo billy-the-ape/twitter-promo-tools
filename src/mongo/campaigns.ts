@@ -4,7 +4,7 @@ import { FilterQuery, ObjectId } from 'mongodb';
 import { getCollection, getUserCampaignPermissions } from './util';
 
 export const upsertCampaign = async (userId: string, campaign: Campaign) => {
-  const { canEdit } = getUserCampaignPermissions(userId, campaign);
+  const { manager } = getUserCampaignPermissions(userId, campaign);
 
   const {
     // Remove fields that are set on insert or aggregations
@@ -18,7 +18,7 @@ export const upsertCampaign = async (userId: string, campaign: Campaign) => {
   } = campaign;
 
   // Deny user without edit rights on existing campaigns
-  if (!canEdit && _id) {
+  if (!manager && _id) {
     return false;
   }
 
@@ -108,8 +108,8 @@ export const getCampaigns = async (
     const permissions = getUserCampaignPermissions(userId, campaign);
     let { submittedTweets } = campaign;
 
-    // Those with edit rights can see all tweets
-    if (!permissions.canEdit) {
+    // Managers can see all tweets
+    if (!permissions.manager) {
       submittedTweets = submittedTweets?.filter(
         ({ authorId }) => authorId === userId
       );
@@ -154,6 +154,42 @@ export const getCampaignsForUser = async (
   });
 };
 
+export const deleteTweet = async (
+  userId: string,
+  tweetId: string,
+  campaign: Campaign
+) => {
+  const { _id, submittedTweets, permissions: { manager } = {} } = campaign;
+
+  const tweetCollection = await getCollection('tweets');
+  const tweet = await tweetCollection.findOne({ id: tweetId });
+
+  if (!tweet) {
+    return 404;
+  }
+
+  // Managers can delete everyone's tweets
+  if (!manager && userId !== tweet.authorId) {
+    return 403;
+  }
+
+  if (!submittedTweets?.some(({ id }) => id === tweetId)) {
+    return 412;
+  }
+
+  const updatedTweets = submittedTweets.filter(({ id }) => id !== tweetId);
+
+  const collection = await getCollection('campaigns');
+
+  await collection.updateOne(
+    { _id },
+    { $set: { submittedTweets: updatedTweets } }
+  );
+  await tweetCollection.deleteOne({ id: tweetId });
+
+  return 204;
+};
+
 export const addTweetToCampaign = async (
   id: string,
   campaign: Campaign,
@@ -163,10 +199,10 @@ export const addTweetToCampaign = async (
 ) => {
   const { _id, submittedTweets = [] } = campaign;
 
-  const { canTweet, canEdit } = campaign.permissions || {};
+  const { influencer, manager } = campaign.permissions || {};
 
   // User isn't a manager or influencer on the campaign
-  if (!canTweet && !canEdit) {
+  if (!influencer && !manager) {
     return 403;
   }
 
@@ -176,7 +212,7 @@ export const addTweetToCampaign = async (
   const existingTweet = await tweetCollection.findOne({ id });
 
   // Tweet is already submitted and not a manager
-  if (existingTweet !== null && !canEdit) {
+  if (existingTweet !== null && !manager) {
     return 409;
   }
 
@@ -195,10 +231,10 @@ export const addTweetToCampaign = async (
     createdAt,
   };
 
-  tweetCollection.insertOne(newTweet);
   submittedTweets.push(newTweet);
 
   await collection.updateOne({ _id }, { $set: { submittedTweets } });
+  await tweetCollection.insertOne(newTweet);
 
   return 204;
 };

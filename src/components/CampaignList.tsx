@@ -1,7 +1,19 @@
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
 import { fetchJson } from '@/util';
-import { Button, CircularProgress, Grid, makeStyles } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  IconButton,
+  InputAdornment,
+  TextField,
+  makeStyles,
+} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import CancelIcon from '@material-ui/icons/Cancel';
+import SearchIcon from '@material-ui/icons/Search';
 import dynamic from 'next/dynamic';
 import { useSnackbar } from 'notistack';
 import React, { useState } from 'react';
@@ -20,18 +32,31 @@ export type CampaignListProps = {
   className?: string;
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(({ spacing }) => ({
   item: {
     maxWidth: '100%',
     display: 'flex',
     flexDirection: 'column',
   },
-});
+  searchField: {
+    margin: spacing(0, 3),
+    maxWidth: '200px',
+  },
+  searchIcon: {
+    pointerEvents: 'none',
+    cursor: 'pointer',
+  },
+}));
 
 const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const classes = useStyles();
   const { t } = useTranslation();
-  const { data, revalidate } = useSWR<Campaign[]>('/api/campaigns', fetchJson);
+  const isMobile = useIsMobile({ breakpoint: 'md' });
+  const { data, revalidate, mutate } = useSWR<Campaign[]>(
+    '/api/campaigns',
+    fetchJson
+  );
+  const [searchValue, setSearchValue] = useState('');
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
@@ -100,17 +125,38 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
       <Section
         title={t('campaigns')}
         titleAdornment={
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowNewDialog(true);
-            }}
-          >
-            <AddIcon />
-            {t('new_campaign')}
-          </Button>
+          <Box display="flex" justifyContent="flex-end" flexBasis="50%">
+            <TextField
+              variant="outlined"
+              className={classes.searchField}
+              onClick={(e) => e.stopPropagation()}
+              size="small"
+              value={searchValue}
+              onChange={({ target: { value } }) => setSearchValue(value)}
+              InputProps={{
+                endAdornment: !searchValue ? (
+                  <SearchIcon fontSize="small" className={classes.searchIcon} />
+                ) : (
+                  <CancelIcon
+                    onClick={() => setSearchValue('')}
+                    fontSize="small"
+                    style={{ cursor: 'pointer' }}
+                  />
+                ),
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowNewDialog(true);
+              }}
+            >
+              <AddIcon />
+              {isMobile ? t('new') : t('new_campaign')}
+            </Button>
+          </Box>
         }
         badgeNumber={data?.length || 0}
         className={className}
@@ -125,6 +171,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
               <Grid item className={classes.item} key={String(campaign._id)}>
                 <CampaignListItem
                   campaign={campaign}
+                  mutate={mutate}
                   setDeleteCampaign={setDeleteCampaign}
                   setEditCampaign={setEditCampaign}
                 />
