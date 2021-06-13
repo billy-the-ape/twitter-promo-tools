@@ -1,16 +1,7 @@
-import {
-  AccordionDetails,
-  AccordionProps,
-  AccordionSummary,
-  Badge,
-  Box,
-  Paper,
-  Typography,
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { ReactNode, useState } from 'react';
+import { Box, Paper, Typography, makeStyles } from '@material-ui/core';
+import { ReactNode } from 'react';
 
-export type SectionProps = AccordionProps & {
+export type SectionProps = {
   title: ReactNode;
   titleAdornment?: ReactNode;
   className?: string;
@@ -23,8 +14,6 @@ const Section: React.FC<SectionProps> = ({
   title,
   titleAdornment,
   children,
-  badgeNumber = 0,
-  ...rest
 }) => {
   return (
     <Paper className={className}>

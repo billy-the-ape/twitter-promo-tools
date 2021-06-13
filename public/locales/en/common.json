@@ -18,6 +18,8 @@
 	"end_date": "End Date",
 	"expand": "Expand",
 	"home": "Home",
+	"expand_description": "Expand description",
+	"collapse_description": "Collapse description",
 	"meta_description": "Tools for Twitter promoters and managers.",
 	"time_since_last_tweet": "Tweeted {{timeSince}}, {{count}}  done",
 	"time_since_last_tweet_num": "Tweeted {{timeSince}}, {{count}} of {{num}} done",
@@ -43,5 +45,8 @@
 	"tweet_count": "Tweet Count",
 	"tweet_submitted": "Tweet Submitted.",
 	"tweet_wrong_user": "You cannot submit another user's tweet",
-	"user_not_influencer": "Tweet author is not an influencer for that campaign."
+	"user_not_influencer": "Tweet author is not an influencer for that campaign.",
+	"influencers_colon": "Influencers:",
+	"managers_colon": "Managers:",
+	"owner_colon": "Owner:"
 }

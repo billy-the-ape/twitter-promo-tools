@@ -12,6 +12,7 @@ import {
   IconButton,
   ListItemIcon,
   TextField,
+  Theme,
   Tooltip,
   Typography,
   makeStyles,
@@ -35,41 +36,43 @@ const CampaignDetails = dynamic(() => import('./CampaignDetails'), {
   ssr: false,
 });
 
-const useStyles = makeStyles(({ breakpoints, spacing, palette }) => ({
-  campaignItemRoot: {
-    backgroundColor: palette.background.default,
-  },
-  spaced: {
-    margin: spacing(0, 1),
-    maxWidth: spacing(13),
-  },
-  summaryContent: {
-    maxWidth: '100%',
-    [breakpoints.up('sm')]: {
-      maxWidth: 'calc(100% - 36px)',
+const useStyles = makeStyles<Theme, { isExpanded: boolean }>(
+  ({ breakpoints, spacing, palette }) => ({
+    campaignItemRoot: {
+      backgroundColor: palette.background.default,
     },
-  },
-  summaryRoot: {
-    justifyContent: 'space-between',
-  },
-  submitText: {
-    alignSelf: 'center',
-    margin: spacing(1),
-    [breakpoints.up('sm')]: {
-      margin: spacing(0, 5),
-      width: '80%',
+    spaced: {
+      margin: spacing(0, 1),
+      maxWidth: spacing(13),
     },
-  },
-  submitButton: {
-    height: '100%',
-    marginRight: '-14px',
-    zIndex: 1,
-    borderRadius: '4px',
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
-    padding: '7px 16px',
-  },
-}));
+    summaryContent: {
+      maxWidth: '100%',
+      [breakpoints.up('sm')]: {
+        maxWidth: 'calc(100% - 36px)',
+      },
+    },
+    summaryRoot: {
+      justifyContent: 'space-between',
+    },
+    submitText: {
+      alignSelf: 'center',
+      margin: spacing(1),
+      [breakpoints.up('sm')]: {
+        margin: spacing(0, 5),
+        width: '80%',
+      },
+    },
+    submitButton: {
+      height: '100%',
+      marginRight: '-14px',
+      zIndex: 1,
+      borderRadius: '4px',
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
+      padding: '7px 16px',
+    },
+  })
+);
 
 export type CampaignListItemProps = {
   campaign: Campaign;
@@ -88,14 +91,15 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   setDeleteCampaign,
 }) => {
   const [{ user }] = useSession() as any;
-  const classes = useStyles();
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [submitTweet, setSubmitTweet] = useState(false);
   const [isTweetLinkError, setIsTweetLinkError] = useState(false);
   const [tweetLink, setTweetLink] = useState('');
+  const [expandMembers, setExpandMembers] = useState(false);
   const isMobile = useIsMobile();
   const { enqueueSnackbar } = useSnackbar();
+  const classes = useStyles({ isExpanded });
 
   const handleTweetSubmit = async () => {
     const match = TWEET_LINK_REGEX.exec(tweetLink);
@@ -161,10 +165,9 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
 
   return (
     <Accordion
+      expanded={isExpanded}
       className={classes.campaignItemRoot}
-      onChange={(_, expanded) => {
-        setIsExpanded(expanded);
-      }}
+      onChange={(_, expanded) => setIsExpanded(expanded)}
     >
       <AccordionSummary
         classes={{ root: classes.summaryRoot, content: classes.summaryContent }}
@@ -258,7 +261,15 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 )}
                 {campaign.influencers && !!campaign.influencers.length && (
                   <Hidden xsDown>
-                    <AvatarGroup spacing="small" max={5}>
+                    <AvatarGroup
+                      spacing="small"
+                      max={5}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(true);
+                        setExpandMembers(!expandMembers);
+                      }}
+                    >
                       {campaign.influencers.map((u) => {
                         const { screenName, image } =
                           getFullUserData(u, campaign.users!) ?? {};
@@ -321,7 +332,13 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        {isExpanded && <CampaignDetails campaign={campaign} mutate={mutate} />}
+        {isExpanded && (
+          <CampaignDetails
+            campaign={campaign}
+            mutate={mutate}
+            expandMembers={expandMembers}
+          />
+        )}
       </AccordionDetails>
     </Accordion>
   );

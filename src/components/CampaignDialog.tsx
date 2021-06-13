@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogProps,
   DialogTitle,
+  Paper,
   TextField,
   makeStyles,
 } from '@material-ui/core';
@@ -23,11 +24,16 @@ import { useTranslation } from 'react-i18next';
 
 import UserMultiselect from './UserMultiselect';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(({ spacing, palette }) => ({
   paper: {
     width: '500px',
   },
-});
+  userSelect: {
+    padding: spacing(2),
+    margin: spacing(2, 0),
+    backgroundColor: palette.background.default,
+  },
+}));
 
 export type CampaignDialogProps = Omit<DialogProps, 'onClose'> & {
   campaign?: Campaign | null;
@@ -135,20 +141,22 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
                 }
               />
             </Box>
-            <UserMultiselect
-              label={t('add_promoters')}
-              users={campaign?.influencers?.map(
-                (u) => getFullUserData(u, campaign.users)!
-              )}
-              onUsersSelected={(influencers) => handleChange({ influencers })}
-            />
-            <UserMultiselect
-              label={t('add_managers')}
-              users={campaign?.managers?.map(
-                (u) => getFullUserData(u, campaign.users)!
-              )}
-              onUsersSelected={(managers) => handleChange({ managers })}
-            />
+            <Box mt={2}>
+              <UserMultiselect
+                label={t('add_promoters')}
+                users={campaign?.influencers?.map(
+                  (u) => getFullUserData(u, campaign.users)!
+                )}
+                onUsersSelected={(influencers) => handleChange({ influencers })}
+              />
+              <UserMultiselect
+                label={t('add_managers')}
+                users={campaign?.managers?.map(
+                  (u) => getFullUserData(u, campaign.users)!
+                )}
+                onUsersSelected={(managers) => handleChange({ managers })}
+              />
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions>

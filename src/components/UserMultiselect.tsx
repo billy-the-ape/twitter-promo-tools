@@ -1,6 +1,16 @@
 import { User } from '@/types';
-import { fetchJson, noop } from '@/util';
-import { Avatar, Box, Chip, Grid, TextField } from '@material-ui/core';
+import { fetchJson } from '@/util';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Avatar,
+  Box,
+  Chip,
+  Grid,
+  TextField,
+} from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useState } from 'react';
 
 export type UserMultiselectProps = {
@@ -77,16 +87,23 @@ const UserMultiselect: React.FC<UserMultiselectProps> = ({
   };
 
   return (
-    <Box width="100%">
-      <TextField
-        label={label}
-        error={!!missingHandles.length}
-        value={text}
-        onChange={({ target: { value } }) => setText(value)}
-        onBlur={addHandles}
-        onKeyPress={({ key }) => key === 'Enter' && addHandles()}
-      />
-      <Box mt={2}>
+    <Accordion defaultExpanded variant="outlined">
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls={`${label}-content`}
+        id={`${label}-header`}
+      >
+        <TextField
+          label={label}
+          error={!!missingHandles.length}
+          value={text}
+          onClick={(e) => e.stopPropagation()}
+          onChange={({ target: { value } }) => setText(value)}
+          onBlur={addHandles}
+          onKeyPress={({ key }) => key === 'Enter' && addHandles()}
+        />
+      </AccordionSummary>
+      <AccordionDetails>
         <Grid container spacing={1}>
           {handles.map((str) => {
             if (!str) return null;
@@ -117,8 +134,8 @@ const UserMultiselect: React.FC<UserMultiselectProps> = ({
             );
           })}
         </Grid>
-      </Box>
-    </Box>
+      </AccordionDetails>
+    </Accordion>
   );
 };
 
