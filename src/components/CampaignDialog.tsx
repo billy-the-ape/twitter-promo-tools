@@ -71,7 +71,12 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
 
   return (
     <MuiPickersUtilsProvider utils={dateFns}>
-      <Dialog classes={classes} {...dialogProps} onClose={onClose}>
+      <Dialog
+        fullScreen={isMobile}
+        classes={classes}
+        {...dialogProps}
+        onClose={onClose}
+      >
         <DialogTitle>
           {!campaign
             ? t('new_campaign')

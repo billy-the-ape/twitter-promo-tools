@@ -51,7 +51,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const classes = useStyles();
   const { t } = useTranslation();
-  const isMobile = useIsMobile({ breakpoint: 'md' });
+  const isMobile = useIsMobile({ breakpoint: 'sm' });
   const [searchValue, setSearchValue] = useState('');
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [isDialogLoading, setIsDialogLoading] = useState(false);

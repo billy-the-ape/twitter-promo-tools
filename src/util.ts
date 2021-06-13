@@ -70,7 +70,6 @@ export const formatDateSince = (date?: Date | string | null) => {
     return rtf1.format(Math.ceil(diff / week), 'week');
     // just days
   } else if (absDiff > day) {
-    const leftover = diff % day;
     return rtf1.format(Math.ceil(diff / day), 'day');
     // days + hours
   } else if (absDiff > hour) {

@@ -30,6 +30,7 @@ import { useSnackbar } from 'notistack';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
 
 import Menu from './MenuWithTrigger';
 
@@ -76,6 +77,10 @@ const useStyles = makeStyles(({ breakpoints, spacing, palette }) => ({
     [breakpoints.down('sm')]: {
       justifyContent: 'space-around',
     },
+  },
+  markDown: {
+    margin: 0,
+    lineHeight: 0,
   },
 }));
 
@@ -360,7 +365,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
               >
                 {campaign.influencers && !!campaign.influencers.length && (
                   <Hidden smUp>
-                    <AvatarGroup spacing="small" max={20}>
+                    <AvatarGroup spacing="small" max={15}>
                       {campaign.influencers.map((u) => {
                         const { screenName, image } =
                           getFullUserData(u, campaign.users!) ?? {};
@@ -404,7 +409,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                           </Avatar>
                           <Link href={`https://${link}`} target="_blank">
                             <Typography variant="inherit">
-                              {isMobile ? `...${link.substring(14)}` : link}
+                              {isMobile ? `...${link.substring(20)}` : link}
                             </Typography>
                           </Link>
                           <IconButton
@@ -423,7 +428,13 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
             <Divider />
 
             {campaign.description.split('\n').map((desc, i) => (
-              <ReactMarkdown key={i}>{desc}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[gfm]}
+                className={classes.markDown}
+                key={i}
+              >
+                {desc}
+              </ReactMarkdown>
             ))}
           </Box>
         </AccordionDetails>
