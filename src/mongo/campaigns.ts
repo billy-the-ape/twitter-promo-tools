@@ -57,7 +57,6 @@ export const getCampaigns = async (
   query: FilterQuery<Campaign>,
   searchText: string = ''
 ): Promise<Campaign[]> => {
-  console.log({ searchText });
   const collection = await getCollection('campaigns');
   const agg: object[] = [
     {
