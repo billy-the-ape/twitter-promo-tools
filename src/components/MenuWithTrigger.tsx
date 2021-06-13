@@ -20,17 +20,14 @@ const MenuWithTrigger: React.FC<MenuWithTriggerProps> = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setAnchorEl(e.currentTarget);
   };
-  const handleClose = (
-    event: any,
-    reason: 'backdropClick' | 'escapeKeyDown'
-  ) => {
-    event.stopPropagation();
+  const handleClose = (e?: any, reason?: 'backdropClick' | 'escapeKeyDown') => {
+    e?.stopPropagation();
     setAnchorEl(null);
-    menuProps.onClose && menuProps.onClose(event, reason);
+    menuProps.onClose && menuProps.onClose(e, reason ?? 'backdropClick');
   };
 
   return (
@@ -54,6 +51,7 @@ const MenuWithTrigger: React.FC<MenuWithTriggerProps> = ({
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
+        onClick={handleClose}
       >
         {children}
       </Menu>
