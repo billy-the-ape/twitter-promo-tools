@@ -22,6 +22,9 @@ const darkTheme: ThemeOptions = {
     },
     MuiCssBaseline: {
       '@global': {
+        ':root': {
+          colorScheme: 'dark',
+        },
         a: {
           cursor: 'pointer',
           color: DARK_PRIMARY_COLOR,
