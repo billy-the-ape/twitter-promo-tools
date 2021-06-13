@@ -28,11 +28,6 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   paper: {
     width: '500px',
   },
-  userSelect: {
-    padding: spacing(2),
-    margin: spacing(2, 0),
-    backgroundColor: palette.background.default,
-  },
 }));
 
 export type CampaignDialogProps = Omit<DialogProps, 'onClose'> & {
