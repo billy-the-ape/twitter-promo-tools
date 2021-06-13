@@ -30,7 +30,7 @@ import { useSnackbar } from 'notistack';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Menu from './MenuWithTrigger';
+import CampaignMenu from './CampaignMenu';
 
 const CampaignDetails = dynamic(() => import('./CampaignDetails'), {
   ssr: false,
@@ -283,49 +283,16 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                   </Hidden>
                 )}
                 {/* CAMPAIGN ACTIONS!! */}
-                <Menu id={`menu-${campaign._id}`}>
-                  {campaign.permissions?.influencer && (
-                    <Menu.Item
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSubmitTweet(!submitTweet);
-                      }}
-                    >
-                      <ListItemIcon>
-                        <TwitterIcon fontSize="small" />
-                      </ListItemIcon>
-                      <Typography variant="inherit">
-                        {t('submit_tweet')}
-                      </Typography>
-                    </Menu.Item>
-                  )}
-                  {setEditCampaign && campaign.permissions?.manager && (
-                    <Menu.Item
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditCampaign(campaign);
-                      }}
-                    >
-                      <ListItemIcon>
-                        <EditIcon fontSize="small" />
-                      </ListItemIcon>
-                      <Typography variant="inherit">{t('edit')}</Typography>
-                    </Menu.Item>
-                  )}
-                  {setDeleteCampaign && campaign.permissions?.owner && (
-                    <Menu.Item
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteCampaign(campaign);
-                      }}
-                    >
-                      <ListItemIcon>
-                        <DeleteIcon fontSize="small" />
-                      </ListItemIcon>
-                      <Typography variant="inherit">{t('delete')}</Typography>
-                    </Menu.Item>
-                  )}
-                </Menu>
+                <CampaignMenu
+                  campaign={campaign}
+                  onSubmitTweet={() => setSubmitTweet(true)}
+                  onEditCampaign={
+                    setEditCampaign && (() => setEditCampaign(campaign))
+                  }
+                  onDeleteCampaign={
+                    setDeleteCampaign && (() => setDeleteCampaign(campaign))
+                  }
+                />
               </Box>
             </>
           )}
