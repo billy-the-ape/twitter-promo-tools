@@ -54,55 +54,71 @@ export const deleteCampaigns = async (userId: string, ids: ObjectId[]) => {
 
 export const getCampaigns = async (
   userId: string,
-  query: FilterQuery<Campaign>
+  query: FilterQuery<Campaign>,
+  searchText: string = ''
 ): Promise<Campaign[]> => {
+  console.log({ searchText });
   const collection = await getCollection('campaigns');
-  const result = await collection
-    .aggregate([
-      {
-        $match: query,
+  const agg: object[] = [
+    {
+      $match: query,
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'managers.id',
+        foreignField: 'id',
+        as: 'u1',
       },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'managers.id',
-          foreignField: 'id',
-          as: 'u1',
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'creator',
+        foreignField: 'id',
+        as: 'u2',
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'influencers.id',
+        foreignField: 'id',
+        as: 'u3',
+      },
+    },
+    {
+      $addFields: {
+        users: {
+          $setDifference: [
+            {
+              $concatArrays: ['$u1', '$u2', '$u3'],
+            },
+            [],
+          ],
         },
       },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'creator',
-          foreignField: 'id',
-          as: 'u2',
-        },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'influencers.id',
-          foreignField: 'id',
-          as: 'u3',
-        },
-      },
-      {
-        $addFields: {
-          users: {
-            $setDifference: [
-              {
-                $concatArrays: ['$u1', '$u2', '$u3'],
-              },
-              [],
-            ],
+    },
+    {
+      $unset: ['u1', 'u2', 'u3'],
+    },
+  ];
+
+  if (searchText?.trim() ?? '' !== '') {
+    agg.unshift({
+      $search: {
+        index: 'campaignSearch',
+        text: {
+          query: searchText.trim(),
+          path: {
+            wildcard: '*',
           },
         },
       },
-      {
-        $unset: ['u1', 'u2', 'u3'],
-      },
-    ])
-    .toArray();
+    });
+  }
+
+  const result = await collection.aggregate(agg).toArray();
 
   return result.map((campaign) => {
     const permissions = getUserCampaignPermissions(userId, campaign);
@@ -131,27 +147,17 @@ export const getCampaignsForUser = async (
   userId: string,
   searchText?: string
 ): Promise<Campaign[]> => {
-  const search = searchText
-    ? {
-        $search: {
-          index: 'campaignSearch',
-          text: {
-            query: searchText,
-            path: {
-              wildcard: '*',
-            },
-          },
-        },
-      }
-    : {};
-  return await getCampaigns(userId, {
-    $or: [
-      { creator: userId },
-      { managers: { $elemMatch: { id: userId } } },
-      { influencers: { $elemMatch: { id: userId } } },
-    ],
-    ...search,
-  });
+  return await getCampaigns(
+    userId,
+    {
+      $or: [
+        { creator: userId },
+        { managers: { $elemMatch: { id: userId } } },
+        { influencers: { $elemMatch: { id: userId } } },
+      ],
+    },
+    searchText
+  );
 };
 
 export const deleteTweet = async (

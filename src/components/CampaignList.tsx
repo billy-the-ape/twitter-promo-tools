@@ -52,15 +52,15 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const classes = useStyles();
   const { t } = useTranslation();
   const isMobile = useIsMobile({ breakpoint: 'md' });
-  const { data, revalidate, mutate } = useSWR<Campaign[]>(
-    '/api/campaigns',
-    fetchJson
-  );
   const [searchValue, setSearchValue] = useState('');
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
   const [deleteRecord, setDeleteCampaign] = useState<Campaign | null>(null);
+  const { data, revalidate, mutate } = useSWR<Campaign[]>(
+    `/api/campaigns?search=${searchValue}`,
+    fetchJson
+  );
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSaveCampaign = async ({

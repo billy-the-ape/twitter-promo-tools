@@ -20,7 +20,7 @@ const handler: NextApiHandler = async (req, res) => {
           .json(
             await getCampaignsForUser(
               session.user.id,
-              typeof search === 'string' ? search : undefined
+              typeof search === 'string' && search !== '' ? search : undefined
             )
           );
         return;
