@@ -1,4 +1,3 @@
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
 import { getFullUserData } from '@/util';
 import {
@@ -8,20 +7,20 @@ import {
   Collapse,
   Divider,
   Hidden,
-  IconButton,
-  Link,
   Paper,
   Typography,
   makeStyles,
 } from '@material-ui/core';
-import CancelIcon from '@material-ui/icons/Cancel';
 import { AvatarGroup } from '@material-ui/lab';
+import { useSession } from 'next-auth/client';
 import { useSnackbar } from 'notistack';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
+import CampaignCompletion from './CampaignCompletion';
+import TweetList from './TweetList';
 import UserChip from './UserChip';
 import UserChipGrid from './UserChipGrid';
 
@@ -31,17 +30,7 @@ export type CampaignDetailsProps = {
   expandMembers: boolean;
 };
 
-const useStyles = makeStyles(({ breakpoints, spacing }) => ({
-  linkAvatar: {
-    height: spacing(3),
-    width: spacing(3),
-    marginRight: spacing(1),
-  },
-  linkBox: {
-    [breakpoints.down('sm')]: {
-      justifyContent: 'space-around',
-    },
-  },
+const useStyles = makeStyles(({ spacing }) => ({
   markDown: {
     margin: 0,
     lineHeight: spacing(2) + 'px',
@@ -50,6 +39,10 @@ const useStyles = makeStyles(({ breakpoints, spacing }) => ({
     padding: spacing(2),
     margin: spacing(2, 0),
   },
+  tweetList: {
+    marginTop: spacing(-3),
+    marginBottom: spacing(2),
+  },
 }));
 
 const CampaignDetails: React.FC<CampaignDetailsProps> = ({
@@ -57,11 +50,11 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   campaign,
   mutate,
 }) => {
+  const [{ user }] = useSession() as any;
   const [showTweets, setShowTweets] = useState(false);
   const [expandDescription, setExpandDescription] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const classes = useStyles();
   const [expandMembers, setExpandMembers] = useState(false);
 
@@ -97,7 +90,41 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
 
   return (
     <Box display="flex" width="100%" flexDirection="column">
-      <Box display="flex" alignItems="center" justifyContent="space-around">
+      <Box display="flex" flexDirection="column" width="100%">
+        {/* TWEET LIST */}
+        <Box className={classes.tweetList}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => setShowTweets(!showTweets)}
+          >
+            {showTweets
+              ? t('hide_submitted_tweets')
+              : t('show_submitted_tweets')}
+          </Button>
+          <Collapse in={showTweets}>
+            <TweetList
+              tweets={campaign.userTweets || []}
+              users={campaign.users || []}
+              onDelete={handleTweetDelete}
+            />
+            <TweetList
+              tweets={
+                campaign.submittedTweets?.filter(
+                  ({ authorId }) => authorId !== user.id
+                ) || []
+              }
+              users={campaign.users || []}
+              onDelete={handleTweetDelete}
+            />
+          </Collapse>
+        </Box>
+        {(!!campaign.tweetPercentage || !!campaign.datePercentage) && (
+          <CampaignCompletion
+            tweetPercentage={campaign.tweetPercentage}
+            datePercentage={campaign.datePercentage}
+          />
+        )}
         {campaign.influencers && !!campaign.influencers.length && (
           <Hidden smUp>
             <AvatarGroup
@@ -157,47 +184,6 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
               </UserChipGrid>
             </Paper>
           )}
-        </Collapse>
-      </Box>
-      {/* TWEET LIST */}
-      <Box>
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => setShowTweets(!showTweets)}
-        >
-          {showTweets ? t('hide_submitted_tweets') : t('show_submitted_tweets')}
-        </Button>
-        <Collapse in={showTweets}>
-          <Box mt={2} display="flex" flexDirection="column">
-            {campaign.submittedTweets?.map(({ id, authorId }) => {
-              const { screenName, image } =
-                campaign.users?.find(({ id }) => id === authorId) || {};
-              const link = `twitter.com/${screenName}/status/${id}`;
-              return (
-                <Box
-                  className={classes.linkBox}
-                  display="flex"
-                  alignItems="center"
-                >
-                  <Avatar className={classes.linkAvatar} src={image!}>
-                    {screenName?.substr(0, 1).toLocaleUpperCase()}
-                  </Avatar>
-                  <Link href={`https://${link}`} target="_blank">
-                    <Typography variant="inherit">
-                      {isMobile ? `...${link.substring(20)}` : link}
-                    </Typography>
-                  </Link>
-                  <IconButton
-                    onClick={() => handleTweetDelete(id)}
-                    size="small"
-                  >
-                    <CancelIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              );
-            })}
-          </Box>
         </Collapse>
       </Box>
       <Divider />

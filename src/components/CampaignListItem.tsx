@@ -10,7 +10,6 @@ import {
   Button,
   Hidden,
   IconButton,
-  ListItemIcon,
   TextField,
   Theme,
   Tooltip,
@@ -19,10 +18,7 @@ import {
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import TwitterIcon from '@material-ui/icons/Twitter';
 import { AvatarGroup } from '@material-ui/lab';
 import { useSession } from 'next-auth/client';
 import dynamic from 'next/dynamic';
@@ -261,25 +257,27 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 )}
                 {campaign.influencers && !!campaign.influencers.length && (
                   <Hidden xsDown>
-                    <AvatarGroup
-                      spacing="small"
-                      max={5}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsExpanded(true);
-                        setExpandMembers(!expandMembers);
-                      }}
-                    >
-                      {campaign.influencers.map((u) => {
-                        const { screenName, image } =
-                          getFullUserData(u, campaign.users!) ?? {};
-                        return (
-                          <Avatar key={screenName} src={image!}>
-                            {screenName?.substring(0, 1).toLocaleUpperCase()}
-                          </Avatar>
-                        );
-                      })}
-                    </AvatarGroup>
+                    <Tooltip title={t('expand_members') as string}>
+                      <AvatarGroup
+                        spacing="small"
+                        max={5}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsExpanded(true);
+                          setExpandMembers(!expandMembers);
+                        }}
+                      >
+                        {campaign.influencers.map((u) => {
+                          const { screenName, image } =
+                            getFullUserData(u, campaign.users!) ?? {};
+                          return (
+                            <Avatar key={screenName} src={image!}>
+                              {screenName?.substring(0, 1).toLocaleUpperCase()}
+                            </Avatar>
+                          );
+                        })}
+                      </AvatarGroup>
+                    </Tooltip>
                   </Hidden>
                 )}
                 {/* CAMPAIGN ACTIONS!! */}

@@ -52,7 +52,10 @@ export type Campaign = {
   users?: User[];
   tweetCount?: number;
   permissions?: CampaignPermissions;
+  tweetPercentage?: number;
+  datePercentage?: number;
 
+  userTweets: SubmittedTweet[];
   submittedTweets?: SubmittedTweet[];
   // tweets?: Tweet[];
 

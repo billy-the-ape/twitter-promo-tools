@@ -15,14 +15,17 @@ const handler: NextApiHandler = async (req, res) => {
 
     switch (method) {
       case 'GET':
-        res
-          .status(200)
-          .json(
-            await getCampaignsForUser(
-              session.user.id,
-              typeof search === 'string' && search !== '' ? search : undefined
-            )
-          );
+        res.status(200).json(
+          await getCampaignsForUser(
+            session.user.id,
+            typeof search === 'string' && search !== '' ? search : undefined,
+            {
+              fullUsers: true,
+              datePercentage: true,
+              tweetPercentage: true,
+            }
+          )
+        );
         return;
       case 'POST':
         const campaign = JSON.parse(body) as Campaign;

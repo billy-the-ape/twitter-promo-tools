@@ -48,5 +48,9 @@
 	"user_not_influencer": "Tweet author is not an influencer for that campaign.",
 	"influencers_colon": "Influencers:",
 	"managers_colon": "Managers:",
-	"owner_colon": "Owner:"
+	"owner_colon": "Owner:",
+	"expand_members": "Expand campaign members",
+	"tweets_completed": "Tweets completed",
+	"time_passed": "Time Passed",
+	"completion_explanation": "Use these values to gague if it is time to tweet again or not.  If time passed is larger than tweets completed, your average is falling behind!"
 }

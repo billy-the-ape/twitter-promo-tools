@@ -1,6 +1,8 @@
 import { Campaign, SubmittedTweet } from '@/types';
 import { FilterQuery, ObjectId } from 'mongodb';
 
+import type { CampaignAggregationOption } from './campaignAggregations';
+import * as campaignAggregations from './campaignAggregations';
 import { getCollection, getUserCampaignPermissions } from './util';
 
 export const upsertCampaign = async (userId: string, campaign: Campaign) => {
@@ -14,6 +16,8 @@ export const upsertCampaign = async (userId: string, campaign: Campaign) => {
     permissions: _1,
     users: _2,
     submittedTweets: _3, // These should be updated only with `addTweetToCampaign`
+    startDate,
+    endDate,
     ...updateData
   } = campaign;
 
@@ -24,12 +28,26 @@ export const upsertCampaign = async (userId: string, campaign: Campaign) => {
 
   const collection = await getCollection('campaigns');
 
+  let realStartDate = startDate;
+  let realEndDate = endDate;
+
+  if (['string', 'number'].includes(typeof startDate)) {
+    realStartDate = new Date(startDate as any);
+  }
+  if (['string', 'number'].includes(typeof endDate)) {
+    realEndDate = new Date(endDate as any);
+  }
+
   const { upsertedId } = await collection.updateOne(
     {
       _id: new ObjectId(campaign._id!),
     },
     {
-      $set: updateData,
+      $set: {
+        ...updateData,
+        startDate: realStartDate,
+        endDate: realEndDate,
+      },
       $setOnInsert: { dateAdded: new Date(), creator: userId },
     },
     {
@@ -55,52 +73,35 @@ export const deleteCampaigns = async (userId: string, ids: ObjectId[]) => {
 export const getCampaigns = async (
   userId: string,
   query: FilterQuery<Campaign>,
-  searchText: string = ''
+  searchText: string = '',
+  aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {}
 ): Promise<Campaign[]> => {
   const collection = await getCollection('campaigns');
+
   const agg: object[] = [
     {
       $match: query,
     },
     {
-      $lookup: {
-        from: 'users',
-        localField: 'managers.id',
-        foreignField: 'id',
-        as: 'u1',
-      },
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'creator',
-        foreignField: 'id',
-        as: 'u2',
-      },
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'influencers.id',
-        foreignField: 'id',
-        as: 'u3',
-      },
-    },
-    {
       $addFields: {
-        users: {
-          $setDifference: [
-            {
-              $concatArrays: ['$u1', '$u2', '$u3'],
-            },
-            [],
-          ],
+        userTweets: {
+          $filter: {
+            input: '$submittedTweets',
+            as: 'tweet',
+            cond: { $eq: ['$$tweet.authorId', userId] },
+          },
         },
       },
     },
-    {
-      $unset: ['u1', 'u2', 'u3'],
-    },
+    ...Object.entries(aggregationOptions).reduce<object[]>(
+      (agg, [key, value]) => {
+        if (value) {
+          agg.push(...campaignAggregations[key as CampaignAggregationOption]);
+        }
+        return agg;
+      },
+      []
+    ),
   ];
 
   if (searchText?.trim() ?? '' !== '') {
@@ -121,14 +122,16 @@ export const getCampaigns = async (
 
   return result.map((campaign) => {
     const permissions = getUserCampaignPermissions(userId, campaign);
-    let { submittedTweets } = campaign;
+    let { submittedTweets, userTweets } = campaign;
 
     // Managers can see all tweets
     if (!permissions.manager) {
-      submittedTweets = submittedTweets?.filter(
-        ({ authorId }) => authorId === userId
-      );
+      submittedTweets = userTweets;
     }
+    userTweets?.sort(
+      ({ createdAt: createdAtA }, { createdAt: createdAtB }) =>
+        createdAtB?.getTime() ?? 0 - createdAtA?.getTime() ?? 0
+    );
     submittedTweets?.sort(
       ({ createdAt: createdAtA }, { createdAt: createdAtB }) =>
         createdAtB?.getTime() ?? 0 - createdAtA?.getTime() ?? 0
@@ -137,6 +140,7 @@ export const getCampaigns = async (
     return {
       ...campaign,
       submittedTweets,
+      userTweets,
       permissions,
     };
   });
@@ -144,7 +148,8 @@ export const getCampaigns = async (
 
 export const getCampaignsForUser = async (
   userId: string,
-  searchText?: string
+  searchText?: string,
+  aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {}
 ): Promise<Campaign[]> => {
   return await getCampaigns(
     userId,
@@ -155,7 +160,8 @@ export const getCampaignsForUser = async (
         { influencers: { $elemMatch: { id: userId } } },
       ],
     },
-    searchText
+    searchText,
+    aggregationOptions
   );
 };
 
