@@ -1,6 +1,7 @@
 import {
   Box,
   LinearProgress,
+  Paper,
   Tooltip,
   Typography,
   makeStyles,
@@ -45,49 +46,61 @@ const CampaignCompletion: React.FC<CampaignCompletionProps> = ({
     tweetPercentageValue > datePercentageValue ? 'primary' : 'secondary';
 
   return (
-    <Box width="100%" display="flex" alignItems="center" pl={4} pr={4}>
-      <Tooltip title={t('completion_explanation') as string}>
-        <InfoIcon />
-      </Tooltip>
-      <Box flex="1">
-        <Box
-          width="100%"
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography className={classes.title}>
-            {t('tweets_completed')}
-          </Typography>
-          <Typography className={classes.percentageValue} variant="caption">
-            {Math.round(tweetPercentageValue)}%
-          </Typography>
-          <LinearProgress
-            color={color}
-            className={classes.linearProgress}
-            variant="determinate"
-            value={tweetPercentageValue}
-          />
-        </Box>
-        <Box
-          width="100%"
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography className={classes.title}>{t('time_passed')}</Typography>
-          <Typography className={classes.percentageValue} variant="caption">
-            {Math.round(datePercentageValue)}%
-          </Typography>
-          <LinearProgress
-            color={color}
-            className={classes.linearProgress}
-            variant="determinate"
-            value={datePercentageValue}
-          />
+    <Paper>
+      <Box
+        width="100%"
+        display="flex"
+        alignItems="center"
+        pb={2}
+        pt={2}
+        pl={4}
+        pr={4}
+      >
+        <Tooltip title={t('completion_explanation') as string}>
+          <InfoIcon />
+        </Tooltip>
+        <Box flex="1">
+          <Box
+            width="100%"
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography className={classes.title}>
+              {t('tweets_completed')}
+            </Typography>
+            <Typography className={classes.percentageValue} variant="caption">
+              {Math.round(tweetPercentageValue)}%
+            </Typography>
+            <LinearProgress
+              color={color}
+              className={classes.linearProgress}
+              variant="determinate"
+              value={tweetPercentageValue}
+            />
+          </Box>
+          <Box
+            width="100%"
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography className={classes.title}>
+              {t('time_passed')}
+            </Typography>
+            <Typography className={classes.percentageValue} variant="caption">
+              {Math.round(datePercentageValue)}%
+            </Typography>
+            <LinearProgress
+              color={color}
+              className={classes.linearProgress}
+              variant="determinate"
+              value={datePercentageValue}
+            />
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 
