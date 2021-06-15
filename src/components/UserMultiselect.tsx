@@ -9,10 +9,12 @@ import {
   Grid,
   IconButton,
   TextField,
+  Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export type UserMultiselectProps = {
   label: string;
@@ -25,6 +27,7 @@ const UserMultiselect: React.FC<UserMultiselectProps> = ({
   users = [],
   onUsersSelected,
 }) => {
+  const { t } = useTranslation();
   const [text, setText] = useState('');
   const [fullUsers, setFullUsers] = useState<User[]>(users);
   const [handles, setHandles] = useState<string[]>(
@@ -94,22 +97,24 @@ const UserMultiselect: React.FC<UserMultiselectProps> = ({
         aria-controls={`${label}-content`}
         id={`${label}-header`}
       >
-        <TextField
-          label={label}
-          error={!!missingHandles.length}
-          value={text}
-          onClick={(e) => e.stopPropagation()}
-          onChange={({ target: { value } }) => setText(value)}
-          onBlur={addHandles}
-          onKeyPress={({ key }) => key === 'Enter' && addHandles()}
-          InputProps={{
-            endAdornment: (
-              <IconButton size="small" onClick={addHandles}>
-                <AddIcon />
-              </IconButton>
-            ),
-          }}
-        />
+        <Tooltip title={t('user_select_explanation') as string}>
+          <TextField
+            label={label}
+            error={!!missingHandles.length}
+            value={text}
+            onClick={(e) => e.stopPropagation()}
+            onChange={({ target: { value } }) => setText(value)}
+            onBlur={addHandles}
+            onKeyPress={({ key }) => key === 'Enter' && addHandles()}
+            InputProps={{
+              endAdornment: (
+                <IconButton size="small" onClick={addHandles}>
+                  <AddIcon />
+                </IconButton>
+              ),
+            }}
+          />
+        </Tooltip>
       </AccordionSummary>
       <AccordionDetails>
         <Grid container spacing={1}>

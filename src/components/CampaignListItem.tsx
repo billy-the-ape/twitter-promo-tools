@@ -213,30 +213,32 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
         >
           {submitTweet && (
             <>
-              <TextField
-                className={classes.submitText}
-                label={t('submit_tweet_full')}
-                autoFocus
-                error={isTweetLinkError}
-                variant="outlined"
-                value={tweetLink}
-                size="small"
-                onClick={(e) => e.stopPropagation()}
-                onChange={({ target: { value } }) => setTweetLink(value)}
-                InputProps={{
-                  endAdornment: (
-                    <Button
-                      className={classes.submitButton}
-                      variant="contained"
-                      color="primary"
-                      disabled={!tweetLink}
-                      onClick={handleTweetSubmit}
-                    >
-                      <AddIcon />
-                    </Button>
-                  ),
-                }}
-              />
+              <Tooltip title={t('tweet_submit_explanation') as string}>
+                <TextField
+                  className={classes.submitText}
+                  label={t('submit_tweet_full')}
+                  autoFocus
+                  error={isTweetLinkError}
+                  variant="outlined"
+                  value={tweetLink}
+                  size="small"
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={({ target: { value } }) => setTweetLink(value)}
+                  InputProps={{
+                    endAdornment: (
+                      <Button
+                        className={classes.submitButton}
+                        variant="contained"
+                        color="primary"
+                        disabled={!tweetLink}
+                        onClick={handleTweetSubmit}
+                      >
+                        <AddIcon />
+                      </Button>
+                    ),
+                  }}
+                />
+              </Tooltip>
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
