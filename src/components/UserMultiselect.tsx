@@ -5,11 +5,12 @@ import {
   AccordionDetails,
   AccordionSummary,
   Avatar,
-  Box,
   Chip,
   Grid,
+  IconButton,
   TextField,
 } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useState } from 'react';
 
@@ -101,6 +102,13 @@ const UserMultiselect: React.FC<UserMultiselectProps> = ({
           onChange={({ target: { value } }) => setText(value)}
           onBlur={addHandles}
           onKeyPress={({ key }) => key === 'Enter' && addHandles()}
+          InputProps={{
+            endAdornment: (
+              <IconButton size="small" onClick={addHandles}>
+                <AddIcon />
+              </IconButton>
+            ),
+          }}
         />
       </AccordionSummary>
       <AccordionDetails>
