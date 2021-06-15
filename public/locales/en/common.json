@@ -55,10 +55,11 @@
 	"tweet_wrong_user": "You cannot submit another user's tweet",
 	"tweets_completed": "Tweets completed",
 	"user_not_influencer": "Tweet author is not an influencer for that campaign.",
-	"your_completion_stats": "Your completion stats:",
+	"your_completion_stats": "Your completion stats",
 	"delete_tweet": "Delete tweet",
 	"urgency": "Urgency",
 	"date_added_ascending": "Oldest first",
 	"date_added_descending": "Newest first",
-	"sort_campaigns": "Sort campaigns"
+	"sort_campaigns": "Sort campaigns",
+	"campaign_completion_stats": "Campaign completion stats"
 }

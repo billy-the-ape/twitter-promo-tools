@@ -121,18 +121,23 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   const hasDetailsExpanded = useIsInitialized(isExpanded);
 
   const handleTweetSubmit = async () => {
-    const match = TWEET_LINK_REGEX.exec(tweetLink);
-    if (!match) {
-      setIsTweetLinkError(true);
-      return;
-    }
-    setIsTweetLinkError(false);
+    const links = tweetLink.split(/\s/);
+    const ids = [];
+    for (const link of links) {
+      const match = TWEET_LINK_REGEX.exec(link);
+      if (!match) {
+        setIsTweetLinkError(true);
+        return;
+      }
+      setIsTweetLinkError(false);
 
-    const { id } = match.groups || {};
+      const { id } = match.groups || {};
+      ids.push(id);
+    }
 
     const { status } = await fetch(`/api/campaigns/${campaign._id}`, {
       method: 'POST',
-      body: JSON.stringify([id]),
+      body: JSON.stringify(ids),
     });
     switch (status) {
       case 204:

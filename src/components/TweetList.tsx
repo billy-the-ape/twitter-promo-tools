@@ -62,7 +62,12 @@ const TweetList: React.FC<TweetListProps> = ({
             users.find(({ id }) => id === authorId) || {};
           const link = `twitter.com/${screenName}/status/${id}`;
           return (
-            <Box className={classes.linkBox} display="flex" alignItems="center">
+            <Box
+              key={id}
+              className={classes.linkBox}
+              display="flex"
+              alignItems="center"
+            >
               <Avatar className={classes.linkAvatar} src={image!}>
                 {screenName?.substr(0, 1).toLocaleUpperCase()}
               </Avatar>

@@ -9,6 +9,7 @@ import {
   Grid,
   TextField,
   Tooltip,
+  debounce,
   makeStyles,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -18,7 +19,13 @@ import SortIcon from '@material-ui/icons/Sort';
 import { TFunction } from 'next-i18next';
 import dynamic from 'next/dynamic';
 import { useSnackbar } from 'notistack';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Waypoint } from 'react-waypoint';
 import { useSWRInfinite } from 'swr';
@@ -87,14 +94,21 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
   const [deleteRecord, setDeleteCampaign] = useState<Campaign | null>(null);
   const [sortValue, setSortValue] = useState<ValidSort>('urgency');
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState('');
+  const debouncedSetSearchValue = useCallback(
+    debounce(setDebouncedSearchValue, 500),
+    []
+  );
+  useEffect(() => {
+    debouncedSetSearchValue(searchValue);
+  }, [searchValue]);
 
   const getSWRKey = useCallback(
     (page: number, previousPageData: Campaign[] | null) => {
-      console.log('getSWRKey', { page });
       if (previousPageData && !previousPageData.length) return null;
-      return `/api/campaigns?search=${searchValue}&sort=${sortValue}&page=${page}`;
+      return `/api/campaigns?search=${debouncedSearchValue}&sort=${sortValue}&page=${page}`;
     },
-    [searchValue, sortValue]
+    [debouncedSearchValue, sortValue]
   );
 
   const { data, revalidate, mutate, size, setSize } = useSWRInfinite<
@@ -232,10 +246,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
                   <Fragment key={String(campaign._id)}>
                     {isLastPage && index === 9 && (
                       <Waypoint
-                        onEnter={() => {
-                          console.log('ON ENTER', { size, pageIndex });
-                          setSize(Math.max(size, pageIndex + 2));
-                        }}
+                        onEnter={() => setSize(Math.max(size, pageIndex + 2))}
                       />
                     )}
                     <Grid item className={classes.item}>

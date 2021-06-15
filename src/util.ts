@@ -190,3 +190,14 @@ export const calculatePercentOff = ({
     maxValue
   );
 };
+
+export const debounce = (fn: Function, timeout: number): Function => {
+  let timeoutId: NodeJS.Timeout | null = null;
+  return (...args: any[]) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn(...args);
+    }, timeout);
+    return timeoutId;
+  };
+};

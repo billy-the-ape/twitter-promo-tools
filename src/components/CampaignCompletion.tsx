@@ -7,9 +7,13 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
+import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles(({ breakpoints, spacing }) => ({
+  completionRoot: {
+    marginTop: spacing(2),
+  },
   title: {
     width: '160px',
     textAlign: 'right',
@@ -28,11 +32,13 @@ const useStyles = makeStyles(({ breakpoints, spacing }) => ({
 }));
 
 export type CampaignCompletionProps = {
+  title: ReactNode;
   tweetPercentage?: number;
   datePercentage?: number;
 };
 
 const CampaignCompletion: React.FC<CampaignCompletionProps> = ({
+  title,
   tweetPercentage,
   datePercentage,
 }) => {
@@ -42,11 +48,8 @@ const CampaignCompletion: React.FC<CampaignCompletionProps> = ({
   const tweetPercentageValue = (tweetPercentage ?? 0) * 100;
   const datePercentageValue = (datePercentage ?? 0) * 100;
 
-  const color =
-    tweetPercentageValue > datePercentageValue ? 'primary' : 'secondary';
-
   return (
-    <Paper>
+    <Paper className={classes.completionRoot}>
       <Box
         width="100%"
         display="flex"
@@ -57,7 +60,7 @@ const CampaignCompletion: React.FC<CampaignCompletionProps> = ({
         pl={4}
         pr={4}
       >
-        <Typography variant="body1">{t('your_completion_stats')}</Typography>
+        <Typography variant="body1">{title}</Typography>
         <Box display="flex" alignItems="center" width="100%">
           <Tooltip title={t('completion_explanation') as string}>
             <InfoIcon />
@@ -76,7 +79,6 @@ const CampaignCompletion: React.FC<CampaignCompletionProps> = ({
                 {Math.round(tweetPercentageValue)}%
               </Typography>
               <LinearProgress
-                color={color}
                 className={classes.linearProgress}
                 variant="determinate"
                 value={tweetPercentageValue}
@@ -95,7 +97,6 @@ const CampaignCompletion: React.FC<CampaignCompletionProps> = ({
                 {Math.round(datePercentageValue)}%
               </Typography>
               <LinearProgress
-                color={color}
                 className={classes.linearProgress}
                 variant="determinate"
                 value={datePercentageValue}

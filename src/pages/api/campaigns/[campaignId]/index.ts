@@ -42,16 +42,23 @@ const handler: NextApiHandler = async (req, res) => {
       }
       const [campaign] = campaigns;
 
-      // Check tweet is from current user or manager
-      const [{ author_id: authorId, created_at: createdAt }] = tweetResult;
-      if (authorId !== session.user.id && !campaign.permissions?.manager) {
+      if (
+        !campaign.permissions?.manager &&
+        tweetResult.some(({ author_id }) => {
+          return author_id !== session.user.id;
+        })
+      ) {
         res.status(400).send({});
         return;
       }
-
-      for (const tid of tweetIds) {
+      // Check tweet is from current user or manager
+      for (const {
+        id,
+        author_id: authorId,
+        created_at: createdAt,
+      } of tweetResult) {
         const result = await addTweetToCampaign(
-          tid,
+          id,
           campaign,
           authorId,
           session.user.id,

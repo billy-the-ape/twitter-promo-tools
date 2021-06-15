@@ -116,6 +116,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
             <Box mt={1}>
               {(!!campaign.tweetPercentage || !!campaign.datePercentage) && (
                 <CampaignCompletion
+                  title={t('your_completion_stats')}
                   tweetPercentage={campaign.tweetPercentage}
                   datePercentage={campaign.datePercentage}
                 />
@@ -126,6 +127,18 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
                 onDelete={handleTweetDelete}
                 campaignName={campaign.name}
               />
+              {(!!campaign.submittedTweets || !!campaign.datePercentage) &&
+                !!campaign.tweetCount &&
+                !!campaign.influencers && (
+                  <CampaignCompletion
+                    title={t('campaign_completion_stats')}
+                    tweetPercentage={
+                      (campaign.submittedTweets?.length ?? 0) /
+                      (campaign.tweetCount * campaign.influencers.length)
+                    }
+                    datePercentage={campaign.datePercentage}
+                  />
+                )}
               <TweetList
                 tweets={
                   campaign.submittedTweets?.filter(
