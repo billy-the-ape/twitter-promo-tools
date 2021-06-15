@@ -1,4 +1,6 @@
-import { Campaign, TwitterUser, User, UserBase } from '@/types';
+import { SubmittedTweet, TwitterUser, User, UserBase } from '@/types';
+
+import { GREEN, RED, YELLOW } from './constants';
 
 export const fetchJson = <
   TResponse extends Record<string, any> | Record<string, any>[]
@@ -47,8 +49,17 @@ export const userDateFormatString = (() => {
 
 export const getColorFromValue = (value: number) => {
   //value from 0 to 1
+  /* fancy pants way
   var hue = ((1 - value) * 120).toString(10);
   return `hsl(${hue},100%,50%)`;
+   */
+  // Way that matches with gauge
+  if (value > 0.66) {
+    return RED;
+  } else if (value > 0.33) {
+    return YELLOW;
+  }
+  return GREEN;
 };
 
 export const formatDateSince = (date?: Date | string | null) => {
@@ -149,7 +160,11 @@ export const calculatePercentOff = ({
   datePercentage,
   tweetPercentage,
   userTweets,
-}: Campaign) => {
+}: {
+  datePercentage: number;
+  tweetPercentage: number;
+  userTweets: SubmittedTweet[];
+}) => {
   let maxValue = 1;
   if (userTweets.length) {
     const sortedTweets = [...userTweets].sort(

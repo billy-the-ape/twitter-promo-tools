@@ -13,6 +13,7 @@
 	"confrim": "Confirm",
 	"dark_mode": "Dark mode",
 	"delete": "Delete",
+	"delete_tweet_description": "Are you sure you want to delete @{{screenName}}'s tweet submission to {{campaignName}}?",
 	"cannot_be_undone_confirm": "This cannot be undone.  Are you sure?",
 	"delete_name": "Delete {{name}}",
 	"description": "Description",

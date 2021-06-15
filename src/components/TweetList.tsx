@@ -1,10 +1,13 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { SubmittedTweet, User } from '@/types';
+import { formatDate } from '@/util';
 import {
   Avatar,
   Box,
+  Hidden,
   IconButton,
   Link,
+  Tooltip,
   Typography,
   makeStyles,
 } from '@material-ui/core';
@@ -18,6 +21,7 @@ const ConfirmDialog = dynamic(() => import('./ConfirmDialog'), { ssr: false });
 export type TweetListProps = {
   tweets: SubmittedTweet[];
   users: User[];
+  campaignName: string;
   onDelete: (id: string) => void;
 };
 
@@ -34,9 +38,16 @@ const useStyles = makeStyles(({ spacing, breakpoints }) => ({
   },
 }));
 
-const TweetList: React.FC<TweetListProps> = ({ tweets, users, onDelete }) => {
+const TweetList: React.FC<TweetListProps> = ({
+  tweets,
+  users,
+  campaignName,
+  onDelete,
+}) => {
   const classes = useStyles();
-  const [deleteId, setDeleteId] = useState('');
+  const [deleteObj, setDeleteObj] = useState<
+    { id: string; screenName?: string } | undefined
+  >();
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
@@ -46,7 +57,7 @@ const TweetList: React.FC<TweetListProps> = ({ tweets, users, onDelete }) => {
   return (
     <>
       <Box mt={2} display="flex" flexDirection="column">
-        {tweets.map(({ id, authorId }) => {
+        {tweets.map(({ id, authorId, createdAt }) => {
           const { screenName, image } =
             users.find(({ id }) => id === authorId) || {};
           const link = `twitter.com/${screenName}/status/${id}`;
@@ -60,19 +71,34 @@ const TweetList: React.FC<TweetListProps> = ({ tweets, users, onDelete }) => {
                   {isMobile ? `...${link.substring(20)}` : link}
                 </Typography>
               </Link>
-              <IconButton onClick={() => setDeleteId(id)} size="small">
-                <CancelIcon fontSize="small" />
-              </IconButton>
+              <Typography variant="body2">
+                <Hidden smDown>&nbsp;-&nbsp;</Hidden>
+                {formatDate(createdAt)}
+              </Typography>
+              <Box ml={2}>
+                <Tooltip title={t('delete_tweet') as string}>
+                  <IconButton
+                    onClick={() => setDeleteObj({ id, screenName })}
+                    size="small"
+                  >
+                    <CancelIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
             </Box>
           );
         })}
       </Box>
-      {deleteId && (
+      {deleteObj && (
         <ConfirmDialog
           open
           title={t('delete_tweet')}
-          onConfirm={() => onDelete(deleteId)}
-          onClose={() => setDeleteId('')}
+          description={t('delete_tweet_description', {
+            screenName: deleteObj.screenName,
+            campaignName,
+          })}
+          onConfirm={() => onDelete(deleteObj.id)}
+          onClose={() => setDeleteObj(undefined)}
         />
       )}
     </>

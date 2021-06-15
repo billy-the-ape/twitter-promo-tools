@@ -1,4 +1,4 @@
-import { Campaign } from '@/types';
+import { Campaign, SubmittedTweet } from '@/types';
 import { getFullUserData } from '@/util';
 import {
   Avatar,
@@ -58,14 +58,15 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   const classes = useStyles();
   const [expandMembers, setExpandMembers] = useState(false);
 
-  const userSubCountMap = useMemo(
+  // TODO: maybe calculate percent complete and change chip color based on it
+  const userSubMap = useMemo(
     () =>
       !campaign.permissions?.manager
         ? {}
-        : campaign.submittedTweets?.reduce<Record<string, number>>(
-            (acc, { authorId }) => ({
+        : campaign.submittedTweets?.reduce<Record<string, SubmittedTweet[]>>(
+            (acc, t) => ({
               ...acc,
-              [authorId]: (acc[authorId] || 0) + 1,
+              [t.authorId]: acc[t.authorId] ? [...acc[t.authorId], t] : [t],
             }),
             {}
           ) ?? {},
@@ -114,6 +115,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
                 tweets={campaign.userTweets || []}
                 users={campaign.users || []}
                 onDelete={handleTweetDelete}
+                campaignName={campaign.name}
               />
               <TweetList
                 tweets={
@@ -121,6 +123,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
                     ({ authorId }) => authorId !== user.id
                   ) || []
                 }
+                campaignName={campaign.name}
                 users={campaign.users || []}
                 onDelete={handleTweetDelete}
               />
@@ -167,7 +170,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
               <UserChipGrid
                 users={campaign.managers ?? []}
                 fullUserList={campaign.users ?? []}
-                userSubCountMap={userSubCountMap}
+                userSubMap={userSubMap}
               >
                 <Typography variant="body1">{t('managers_colon')}</Typography>
               </UserChipGrid>
@@ -178,7 +181,9 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
               <UserChipGrid
                 users={campaign.influencers}
                 fullUserList={campaign.users ?? []}
-                userSubCountMap={userSubCountMap}
+                userSubMap={userSubMap}
+                datePercentage={campaign.datePercentage}
+                requiredTweetCount={campaign.tweetCount}
               >
                 <Typography variant="body1">
                   {t('influencers_colon')}
