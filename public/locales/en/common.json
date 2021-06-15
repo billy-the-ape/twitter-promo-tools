@@ -6,7 +6,7 @@
 	"campaign_updated": "Campaign updated.",
 	"campaigns": "Campaigns",
 	"cancel": "Cancel",
-	"chart_explanation": "Green means you tweeted recently, relative to the end date of the campaign and how many tweets are required.  Red not so much.",
+	"chart_explanation": "Green means you tweeted in the last 12 hours.  Red indicates you may be behind, relative to the end date of the campaign and how many tweets are required.",
 	"collapse": "Collapse",
 	"collapse_description": "Collapse description",
 	"completion_explanation": "Use these values to gague if it is time to tweet again or not.  If time passed is larger than tweets completed, your average is falling behind!",

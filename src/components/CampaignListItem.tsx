@@ -1,6 +1,11 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
-import { formatDate, formatDateSince, getFullUserData } from '@/util';
+import {
+  calculatePercentOff,
+  formatDate,
+  formatDateSince,
+  getFullUserData,
+} from '@/util';
 import {
   Accordion,
   AccordionDetails,
@@ -8,6 +13,7 @@ import {
   Avatar,
   Box,
   Button,
+  Divider,
   Hidden,
   IconButton,
   TextField,
@@ -92,22 +98,6 @@ export type CampaignListItemProps = {
   setDeleteCampaign?: (c: Campaign) => void;
 };
 
-const calculatePercentOff = ({
-  datePercentage,
-  tweetPercentage,
-  userTweets,
-}: Campaign) =>
-  Math.min(
-    Math.max(
-      (datePercentage ?? 0) -
-        (tweetPercentage ?? 0) +
-        0.5 +
-        // Start in the yellow
-        (userTweets.length === 0 ? 0.33 : 0),
-      0
-    ),
-    1
-  );
 const TWEET_LINK_REGEX =
   /^(https?:\/\/)?twitter.com\/(\w){1,15}\/status\/(?<id>[0-9]+)/i;
 
@@ -117,6 +107,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   setEditCampaign,
   setDeleteCampaign,
 }) => {
+  console.log({ campaign });
   const [{ user }] = useSession() as any;
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -291,44 +282,57 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 )}
                 {/* TWEET GAUGE */}
                 {campaign.permissions?.influencer && !!campaign.datePercentage && (
-                  <Tooltip title={t('chart_explanation') as string}>
-                    <Box mb={-1} ml={-1.5}>
-                      <GaugeChart
-                        hideText
-                        id={`chart-${campaign._id}`}
-                        style={{ width: 80 }}
-                        className={classes.gauge}
-                        percent={calculatePercentOff(campaign)}
-                      />
-                    </Box>
-                  </Tooltip>
-                )}
-                {campaign.influencers && !!campaign.influencers.length && (
-                  <Hidden xsDown>
-                    <Tooltip title={t('expand_members') as string}>
-                      <AvatarGroup
-                        spacing="small"
-                        max={5}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsExpanded(true);
-                          setExpandMembers(!expandMembers);
-                        }}
-                      >
-                        {campaign.influencers.map((u) => {
-                          const { screenName, image } =
-                            getFullUserData(u, campaign.users!) ?? {};
-                          return (
-                            <Avatar key={screenName} src={image!}>
-                              {screenName?.substring(0, 1).toLocaleUpperCase()}
-                            </Avatar>
-                          );
-                        })}
-                      </AvatarGroup>
+                  <>
+                    <Tooltip title={t('chart_explanation') as string}>
+                      <Box mb={-1} ml={-1.5}>
+                        <GaugeChart
+                          hideText
+                          id={`chart-${campaign._id}`}
+                          style={{ width: 80 }}
+                          className={classes.gauge}
+                          percent={calculatePercentOff(campaign)}
+                        />
+                      </Box>
                     </Tooltip>
-                  </Hidden>
+                    <Hidden smDown>
+                      <Divider orientation="vertical" />
+                    </Hidden>
+                  </>
+                )}
+
+                {campaign.users && !!campaign.users.length && (
+                  <>
+                    <Hidden xsDown>
+                      <Tooltip title={t('expand_members') as string}>
+                        <AvatarGroup
+                          spacing="small"
+                          max={5}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsExpanded(true);
+                            setExpandMembers(!expandMembers);
+                          }}
+                        >
+                          {campaign.users.map((u) => {
+                            const { screenName, image } =
+                              getFullUserData(u, campaign.users!) ?? {};
+                            return (
+                              <Avatar key={screenName} src={image!}>
+                                {screenName
+                                  ?.substring(0, 1)
+                                  .toLocaleUpperCase()}
+                              </Avatar>
+                            );
+                          })}
+                        </AvatarGroup>
+                      </Tooltip>
+                    </Hidden>
+                  </>
                 )}
                 {/* CAMPAIGN ACTIONS!! */}
+                <Hidden smDown>
+                  <Divider orientation="vertical" />
+                </Hidden>
                 <CampaignMenu
                   campaign={campaign}
                   onSubmitTweet={() => setSubmitTweet(true)}

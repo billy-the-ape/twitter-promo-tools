@@ -1,4 +1,4 @@
-import { TwitterUser, User, UserBase } from '@/types';
+import { Campaign, TwitterUser, User, UserBase } from '@/types';
 
 export const fetchJson = <
   TResponse extends Record<string, any> | Record<string, any>[]
@@ -133,4 +133,45 @@ export const fetchTwitterApi = async <
     }
   );
   return data as TResponse;
+};
+
+// STAY GREEN UNTIL THIS TIME IS UP
+const TWEET_COOLDOWN = 60000 * 60 * 12; // 12 hours
+// LOWER THAN THIS VALUE MEANS GREEN
+const GREEN_PCT = 0.33;
+
+/* This complex beast basically has the following logic:
+ *  - If user tweeted for this campaign in the last 12 hours, the color should be
+      green no matter what.
+ *  - If past 12 hours, this should become progressively higher 
+*/
+export const calculatePercentOff = ({
+  datePercentage,
+  tweetPercentage,
+  userTweets,
+}: Campaign) => {
+  let maxValue = 1;
+  if (userTweets.length) {
+    const sortedTweets = [...userTweets].sort(
+      ({ createdAt: a }, { createdAt: b }) =>
+        new Date(b).getTime() - new Date(a).getTime()
+    );
+    const lastTweetDate = new Date(sortedTweets[0].createdAt).getTime();
+    const diff = Date.now() - lastTweetDate;
+    if (diff < TWEET_COOLDOWN) {
+      maxValue = (diff / TWEET_COOLDOWN) * GREEN_PCT;
+    }
+  }
+
+  return Math.min(
+    Math.max(
+      (datePercentage ?? 0) -
+        (tweetPercentage ?? 0) +
+        0.4 + // Magic number
+        // Add .33 to start in the yellow when no tweets
+        (userTweets.length === 0 ? GREEN_PCT : 0),
+      0
+    ),
+    maxValue
+  );
 };
