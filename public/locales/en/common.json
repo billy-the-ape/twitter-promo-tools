@@ -6,13 +6,14 @@
 	"campaign_updated": "Campaign updated.",
 	"campaigns": "Campaigns",
 	"cancel": "Cancel",
+	"chart_explanation": "Green means you tweeted recently, relative to the end date of the campaign and how many tweets are required.  Red not so much.",
 	"collapse": "Collapse",
 	"collapse_description": "Collapse description",
 	"completion_explanation": "Use these values to gague if it is time to tweet again or not.  If time passed is larger than tweets completed, your average is falling behind!",
 	"confrim": "Confirm",
 	"dark_mode": "Dark mode",
 	"delete": "Delete",
-	"delete_confirm": "This cannot be undone.  Are you sure?",
+	"cannot_be_undone_confirm": "This cannot be undone.  Are you sure?",
 	"delete_name": "Delete {{name}}",
 	"description": "Description",
 	"edit": "Edit",
@@ -52,5 +53,7 @@
 	"tweet_submitted": "Tweet Submitted.",
 	"tweet_wrong_user": "You cannot submit another user's tweet",
 	"tweets_completed": "Tweets completed",
-	"user_not_influencer": "Tweet author is not an influencer for that campaign."
+	"user_not_influencer": "Tweet author is not an influencer for that campaign.",
+	"your_completion_stats": "Your completion stats:",
+	"delete_tweet": "Delete tweet"
 }

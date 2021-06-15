@@ -24,6 +24,7 @@ import { useSession } from 'next-auth/client';
 import dynamic from 'next/dynamic';
 import { useSnackbar } from 'notistack';
 import { useMemo, useState } from 'react';
+import GaugeChart from 'react-gauge-chart';
 import { useTranslation } from 'react-i18next';
 
 import CampaignMenu from './CampaignMenu';
@@ -67,6 +68,20 @@ const useStyles = makeStyles<Theme, { isExpanded: boolean }>(
       borderBottomLeftRadius: 0,
       padding: '7px 16px',
     },
+    circle: {
+      position: 'relative',
+      top: '6px',
+      marginRight: spacing(1),
+      display: 'inline-block',
+      height: spacing(1.5),
+      width: spacing(1.5),
+      borderRadius: '50%',
+      border: `1px solid ${palette.text.primary}`,
+    },
+    /* gauge: {
+      height: spacing(3),
+      width: spacing(3),
+    }, */
   })
 );
 
@@ -77,6 +92,22 @@ export type CampaignListItemProps = {
   setDeleteCampaign?: (c: Campaign) => void;
 };
 
+const calculatePercentOff = ({
+  datePercentage,
+  tweetPercentage,
+  userTweets,
+}: Campaign) =>
+  Math.min(
+    Math.max(
+      (datePercentage ?? 0) -
+        (tweetPercentage ?? 0) +
+        0.5 +
+        // Start in the yellow
+        (userTweets.length === 0 ? 0.33 : 0),
+      0
+    ),
+    1
+  );
 const TWEET_LINK_REGEX =
   /^(https?:\/\/)?twitter.com\/(\w){1,15}\/status\/(?<id>[0-9]+)/i;
 
@@ -226,9 +257,24 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 display="flex"
                 flexDirection="column"
               >
-                <Typography variant="body1" noWrap>
-                  {campaign.name}
-                </Typography>
+                <Box display="flex" alignItems="center">
+                  <Typography variant="body1" noWrap>
+                    {campaign.name}
+                  </Typography>
+                  {!isMobile && (campaign.startDate || campaign.endDate) && (
+                    <Box mr={2}>
+                      <Typography
+                        className={classes.spaced}
+                        component="span"
+                        variant="caption"
+                        noWrap
+                      >
+                        {formatDate(campaign.startDate)} -{' '}
+                        {formatDate(campaign.endDate)}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
                 {isMobile && (
                   <Typography variant="body2" noWrap>
                     {formatDate(campaign.startDate)} -{' '}
@@ -237,23 +283,25 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 )}
               </Box>
               <Box display="flex" alignItems="center">
-                {!isMobile && (campaign.startDate || campaign.endDate) && (
-                  <Box mr={2}>
-                    <Typography
-                      className={classes.spaced}
-                      component="span"
-                      variant="body2"
-                      noWrap
-                    >
-                      {formatDate(campaign.startDate)} -{' '}
-                      {formatDate(campaign.endDate)}
-                    </Typography>
-                  </Box>
-                )}
+                {/* INFO ABOUT LAST TWEET */}
                 {(!!campaign.tweetCount || !!myTweets?.length) && (
                   <Typography variant="caption" className={classes.spaced}>
                     {tweetString}
                   </Typography>
+                )}
+                {/* TWEET GAUGE */}
+                {campaign.permissions?.influencer && !!campaign.datePercentage && (
+                  <Tooltip title={t('chart_explanation') as string}>
+                    <Box mb={-1} ml={-1.5}>
+                      <GaugeChart
+                        hideText
+                        id={`chart-${campaign._id}`}
+                        style={{ width: 80 }}
+                        className={classes.gauge}
+                        percent={calculatePercentOff(campaign)}
+                      />
+                    </Box>
+                  </Tooltip>
                 )}
                 {campaign.influencers && !!campaign.influencers.length && (
                   <Hidden xsDown>

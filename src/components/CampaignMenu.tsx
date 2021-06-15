@@ -1,5 +1,12 @@
-import { Campaign, CampaignPermissions } from '@/types';
-import { ListItemIcon, Typography } from '@material-ui/core';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { Campaign } from '@/types';
+import {
+  Box,
+  IconButton,
+  ListItemIcon,
+  Tooltip,
+  Typography,
+} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import TwitterIcon from '@material-ui/icons/Twitter';
@@ -21,9 +28,17 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
   onDeleteCampaign,
 }) => {
   const { t } = useTranslation();
-  return (
+  const isSm = useIsMobile({ breakpoint: 'sm' });
+
+  const {
+    influencer: isInfluencer = false,
+    manager: isManager = false,
+    owner: isOwner = false,
+  } = campaign.permissions ?? {};
+
+  return isSm ? (
     <Menu id={`menu-${campaign._id}`}>
-      {onSubmitTweet && campaign.permissions?.influencer && (
+      {onSubmitTweet && isInfluencer && (
         <Menu.Item onClick={onSubmitTweet}>
           <ListItemIcon>
             <TwitterIcon fontSize="small" />
@@ -31,7 +46,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           <Typography variant="inherit">{t('submit_tweet')}</Typography>
         </Menu.Item>
       )}
-      {onEditCampaign && campaign.permissions?.manager && (
+      {onEditCampaign && isManager && (
         <Menu.Item onClick={onEditCampaign}>
           <ListItemIcon>
             <EditIcon fontSize="small" />
@@ -39,7 +54,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           <Typography variant="inherit">{t('edit')}</Typography>
         </Menu.Item>
       )}
-      {onDeleteCampaign && campaign.permissions?.owner && (
+      {onDeleteCampaign && isOwner && (
         <Menu.Item onClick={onDeleteCampaign}>
           <ListItemIcon>
             <DeleteIcon fontSize="small" />
@@ -48,6 +63,30 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
         </Menu.Item>
       )}
     </Menu>
+  ) : (
+    <Box display="flex">
+      {onSubmitTweet && isInfluencer && (
+        <Tooltip title={t('submit_tweet') as string}>
+          <IconButton onClick={onSubmitTweet}>
+            <TwitterIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {onEditCampaign && isManager && (
+        <Tooltip title={t('edit') as string}>
+          <IconButton onClick={onEditCampaign}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {onDeleteCampaign && isOwner && (
+        <Tooltip title={t('delete') as string}>
+          <IconButton onClick={onDeleteCampaign}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+    </Box>
   );
 };
 

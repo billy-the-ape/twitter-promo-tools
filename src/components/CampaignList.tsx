@@ -6,8 +6,6 @@ import {
   Button,
   CircularProgress,
   Grid,
-  IconButton,
-  InputAdornment,
   TextField,
   makeStyles,
 } from '@material-ui/core';
@@ -196,7 +194,6 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
         <ConfirmDialog
           open
           title={t('delete_name', { name: deleteRecord.name })}
-          subText={t('delete_confirm')}
           confirmText="Delete"
           onClose={() => setDeleteCampaign(null)}
           onConfirm={handleDeleteCampaign}

@@ -9,17 +9,17 @@ import {
 import InfoIcon from '@material-ui/icons/Info';
 import { useTranslation } from 'react-i18next';
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ breakpoints, spacing }) => ({
   title: {
     width: '160px',
     textAlign: 'right',
   },
   linearProgress: {
     flex: 1,
-    marginRight: spacing(5),
     maxWidth: '100%',
-    minWidth: '200px',
-    width: '390px',
+    [breakpoints.up('md')]: {
+      marginRight: spacing(5),
+    },
   },
   percentageValue: {
     minWidth: '100px',
@@ -50,53 +50,58 @@ const CampaignCompletion: React.FC<CampaignCompletionProps> = ({
       <Box
         width="100%"
         display="flex"
+        flexDirection="column"
         alignItems="center"
         pb={2}
         pt={2}
         pl={4}
         pr={4}
       >
-        <Tooltip title={t('completion_explanation') as string}>
-          <InfoIcon />
-        </Tooltip>
-        <Box flex="1">
-          <Box
-            width="100%"
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography className={classes.title}>
-              {t('tweets_completed')}
-            </Typography>
-            <Typography className={classes.percentageValue} variant="caption">
-              {Math.round(tweetPercentageValue)}%
-            </Typography>
-            <LinearProgress
-              color={color}
-              className={classes.linearProgress}
-              variant="determinate"
-              value={tweetPercentageValue}
-            />
-          </Box>
-          <Box
-            width="100%"
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography className={classes.title}>
-              {t('time_passed')}
-            </Typography>
-            <Typography className={classes.percentageValue} variant="caption">
-              {Math.round(datePercentageValue)}%
-            </Typography>
-            <LinearProgress
-              color={color}
-              className={classes.linearProgress}
-              variant="determinate"
-              value={datePercentageValue}
-            />
+        <Typography variant="body1">{t('your_completion_stats')}</Typography>
+        <Box display="flex" alignItems="center" width="100%">
+          <Tooltip title={t('completion_explanation') as string}>
+            <InfoIcon />
+          </Tooltip>
+          <Box flex="1">
+            <Box
+              width="100%"
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Typography className={classes.title}>
+                {t('tweets_completed')}
+              </Typography>
+              <Typography className={classes.percentageValue} variant="caption">
+                {Math.round(tweetPercentageValue)}%
+              </Typography>
+              <LinearProgress
+                color={color}
+                className={classes.linearProgress}
+                variant="determinate"
+                value={tweetPercentageValue}
+              />
+            </Box>
+            <Box
+              width="100%"
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              className={classes.infoContainer}
+            >
+              <Typography className={classes.title}>
+                {t('time_passed')}
+              </Typography>
+              <Typography className={classes.percentageValue} variant="caption">
+                {Math.round(datePercentageValue)}%
+              </Typography>
+              <LinearProgress
+                color={color}
+                className={classes.linearProgress}
+                variant="determinate"
+                value={datePercentageValue}
+              />
+            </Box>
           </Box>
         </Box>
       </Box>

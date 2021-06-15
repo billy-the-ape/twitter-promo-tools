@@ -13,17 +13,17 @@ import { useTranslation } from 'react-i18next';
 
 export type ConfirmDialogProps = Omit<DialogProps, 'onClose'> & {
   title: ReactNode;
-  onConfirm: () => Promise<any>;
+  onConfirm: () => Promise<any> | void;
   onClose: () => void;
-  subText?: string;
+  description?: string;
   confirmText?: string;
   isLoading?: boolean;
 };
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   title,
-  subText,
-  confirmText = 'Save',
+  description,
+  confirmText,
   isLoading,
   onConfirm,
   onClose,
@@ -33,11 +33,11 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   return (
     <Dialog {...rest} onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
-      {subText && (
-        <DialogContent>
-          <Typography variant="body1">{subText}</Typography>
-        </DialogContent>
-      )}
+      <DialogContent>
+        <Typography variant="body1">
+          {description || t('cannot_be_undone_confirm')}
+        </Typography>
+      </DialogContent>
       <DialogActions>
         <Button
           variant="contained"
@@ -48,7 +48,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           }}
           disabled={isLoading}
         >
-          {isLoading ? <CircularProgress /> : t('confirm')}
+          {isLoading ? <CircularProgress /> : confirmText || t('confirm')}
         </Button>
         <Button onClick={onClose}>{t('cancel')}</Button>
       </DialogActions>

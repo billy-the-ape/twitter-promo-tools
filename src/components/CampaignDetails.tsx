@@ -40,7 +40,7 @@ const useStyles = makeStyles(({ spacing }) => ({
     margin: spacing(2, 0),
   },
   tweetList: {
-    marginTop: spacing(-3),
+    marginTop: spacing(-1),
     marginBottom: spacing(2),
   },
 }));
@@ -103,28 +103,30 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
               : t('show_submitted_tweets')}
           </Button>
           <Collapse in={showTweets}>
-            <TweetList
-              tweets={campaign.userTweets || []}
-              users={campaign.users || []}
-              onDelete={handleTweetDelete}
-            />
-            <TweetList
-              tweets={
-                campaign.submittedTweets?.filter(
-                  ({ authorId }) => authorId !== user.id
-                ) || []
-              }
-              users={campaign.users || []}
-              onDelete={handleTweetDelete}
-            />
+            <Box mt={1}>
+              {(!!campaign.tweetPercentage || !!campaign.datePercentage) && (
+                <CampaignCompletion
+                  tweetPercentage={campaign.tweetPercentage}
+                  datePercentage={campaign.datePercentage}
+                />
+              )}
+              <TweetList
+                tweets={campaign.userTweets || []}
+                users={campaign.users || []}
+                onDelete={handleTweetDelete}
+              />
+              <TweetList
+                tweets={
+                  campaign.submittedTweets?.filter(
+                    ({ authorId }) => authorId !== user.id
+                  ) || []
+                }
+                users={campaign.users || []}
+                onDelete={handleTweetDelete}
+              />
+            </Box>
           </Collapse>
         </Box>
-        {(!!campaign.tweetPercentage || !!campaign.datePercentage) && (
-          <CampaignCompletion
-            tweetPercentage={campaign.tweetPercentage}
-            datePercentage={campaign.datePercentage}
-          />
-        )}
         {campaign.influencers && !!campaign.influencers.length && (
           <Hidden smUp>
             <AvatarGroup
