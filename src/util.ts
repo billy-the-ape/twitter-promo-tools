@@ -161,12 +161,12 @@ export const calculatePercentOff = ({
   tweetPercentage,
   userTweets,
 }: {
-  datePercentage: number;
-  tweetPercentage: number;
-  userTweets: SubmittedTweet[];
+  datePercentage?: number;
+  tweetPercentage?: number;
+  userTweets?: SubmittedTweet[];
 }) => {
   let maxValue = 1;
-  if (userTweets.length) {
+  if (userTweets?.length) {
     const sortedTweets = [...userTweets].sort(
       ({ createdAt: a }, { createdAt: b }) =>
         new Date(b).getTime() - new Date(a).getTime()
@@ -184,7 +184,7 @@ export const calculatePercentOff = ({
         (tweetPercentage ?? 0) +
         0.4 + // Magic number
         // Add .33 to start in the yellow when no tweets
-        (userTweets.length === 0 ? GREEN_PCT : 0),
+        ((userTweets?.length ?? 0) === 0 ? GREEN_PCT : 0),
       0
     ),
     maxValue

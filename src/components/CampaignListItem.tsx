@@ -266,7 +266,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                     </Box>
                   )}
                 </Box>
-                {isMobile && (
+                {isMobile && (campaign.startDate || campaign.endDate) && (
                   <Typography variant="body2" noWrap>
                     {formatDate(campaign.startDate)} -{' '}
                     {formatDate(campaign.endDate)}
@@ -274,12 +274,14 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 )}
               </Box>
               <Box display="flex" alignItems="center">
-                {/* INFO ABOUT LAST TWEET */}
-                {(!!campaign.tweetCount || !!myTweets?.length) && (
-                  <Typography variant="caption" className={classes.spaced}>
-                    {tweetString}
-                  </Typography>
-                )}
+                <Hidden xsDown>
+                  {/* INFO ABOUT LAST TWEET */}
+                  {(!!campaign.tweetCount || !!myTweets?.length) && (
+                    <Typography variant="caption" className={classes.spaced}>
+                      {tweetString}
+                    </Typography>
+                  )}
+                </Hidden>
                 {/* TWEET GAUGE */}
                 {campaign.permissions?.influencer && !!campaign.datePercentage && (
                   <>
@@ -354,6 +356,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
             campaign={campaign}
             mutate={mutate}
             expandMembers={expandMembers}
+            tweetString={tweetString}
           />
         )}
       </AccordionDetails>

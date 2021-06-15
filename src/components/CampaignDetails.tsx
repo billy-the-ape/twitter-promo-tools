@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign, SubmittedTweet } from '@/types';
 import { getFullUserData } from '@/util';
 import {
@@ -28,6 +29,7 @@ export type CampaignDetailsProps = {
   campaign: Campaign;
   mutate: () => void;
   expandMembers: boolean;
+  tweetString?: string;
 };
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -49,6 +51,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   expandMembers: expandMembersFromProps,
   campaign,
   mutate,
+  tweetString,
 }) => {
   const [{ user }] = useSession() as any;
   const [showTweets, setShowTweets] = useState(false);
@@ -57,6 +60,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   const { t } = useTranslation();
   const classes = useStyles();
   const [expandMembers, setExpandMembers] = useState(false);
+  const isMobile = useIsMobile();
 
   // TODO: maybe calculate percent complete and change chip color based on it
   const userSubMap = useMemo(
@@ -94,6 +98,11 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
       <Box display="flex" flexDirection="column" width="100%">
         {/* TWEET LIST */}
         <Box className={classes.tweetList}>
+          {isMobile && tweetString && (
+            <Typography variant="body2" noWrap>
+              {tweetString}
+            </Typography>
+          )}
           <Button
             variant="contained"
             size="small"
