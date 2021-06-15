@@ -87,7 +87,6 @@ const CampaignCompletion: React.FC<CampaignCompletionProps> = ({
               display="flex"
               justifyContent="space-between"
               alignItems="center"
-              className={classes.infoContainer}
             >
               <Typography className={classes.title}>
                 {t('time_passed')}
