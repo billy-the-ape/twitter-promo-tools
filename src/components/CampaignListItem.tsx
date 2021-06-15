@@ -1,3 +1,4 @@
+import { useIsInitialized } from '@/hooks/useIsInitialized';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
 import {
@@ -107,7 +108,6 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   setEditCampaign,
   setDeleteCampaign,
 }) => {
-  console.log({ campaign });
   const [{ user }] = useSession() as any;
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -118,6 +118,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   const isMobile = useIsMobile();
   const { enqueueSnackbar } = useSnackbar();
   const classes = useStyles({ isExpanded });
+  const hasDetailsExpanded = useIsInitialized(isExpanded);
 
   const handleTweetSubmit = async () => {
     const match = TWEET_LINK_REGEX.exec(tweetLink);
@@ -351,7 +352,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        {isExpanded && (
+        {hasDetailsExpanded && (
           <CampaignDetails
             campaign={campaign}
             mutate={mutate}
