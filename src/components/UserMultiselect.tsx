@@ -38,7 +38,7 @@ const UserMultiselect: React.FC<UserMultiselectProps> = ({
     }
 
     const invalidHandles: string[] = [];
-    const newHandles = text.split(' ').reduce<string[]>((acc, s) => {
+    const newHandles = text.split(/\s/).reduce<string[]>((acc, s) => {
       const trimmed = s
         .replace('@', '')
         .replace(/(https?:\/\/)?twitter.com\//, '');
