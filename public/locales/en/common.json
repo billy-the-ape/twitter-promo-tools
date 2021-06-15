@@ -56,5 +56,9 @@
 	"tweets_completed": "Tweets completed",
 	"user_not_influencer": "Tweet author is not an influencer for that campaign.",
 	"your_completion_stats": "Your completion stats:",
-	"delete_tweet": "Delete tweet"
+	"delete_tweet": "Delete tweet",
+	"urgency": "Urgency",
+	"date_added_ascending": "Oldest first",
+	"date_added_descending": "Newest first",
+	"sort_campaigns": "Sort campaigns"
 }

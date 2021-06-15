@@ -1,9 +1,6 @@
-export type CampaignAggregationOption =
-  | 'datePercentage'
-  | 'tweetPercentage'
-  | 'fullUsers';
+export type CampaignAggregationOption = 'completionPercentage' | 'fullUsers';
 
-export const datePercentage: object[] = [
+export const completionPercentage: object[] = [
   {
     $addFields: {
       tempSubtractNow: {
@@ -66,9 +63,6 @@ export const datePercentage: object[] = [
     // Remove temp fields
     $unset: ['tempSubtractNow', 'tempSubtractStart'],
   },
-];
-
-export const tweetPercentage: object[] = [
   {
     $addFields: {
       tweetPercentage: {
@@ -86,6 +80,34 @@ export const tweetPercentage: object[] = [
           then: 0,
           else: {
             $divide: [{ $size: '$userTweets' }, '$tweetCount'],
+          },
+        },
+      },
+    },
+  },
+  {
+    $addFields: {
+      completionOffBy: {
+        $cond: {
+          if: {
+            $or: [
+              { $eq: ['$datePercentage', 0] },
+              { $eq: ['$tweetPercentage', 1] },
+            ],
+          },
+          then: 0,
+          else: {
+            $add: [
+              { $subtract: ['$datePercentage', '$tweetPercentage'] },
+              0.4,
+              {
+                $cond: {
+                  if: { $eq: ['$tweetPercentage', 0] },
+                  then: 0.33,
+                  else: 0,
+                },
+              },
+            ],
           },
         },
       },

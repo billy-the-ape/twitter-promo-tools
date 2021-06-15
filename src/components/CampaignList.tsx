@@ -1,4 +1,5 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { ValidSort } from '@/mongo/campaignSorts';
 import { Campaign } from '@/types';
 import { fetchJson } from '@/util';
 import {
@@ -7,18 +8,23 @@ import {
   CircularProgress,
   Grid,
   TextField,
+  Tooltip,
   makeStyles,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
+import SortIcon from '@material-ui/icons/Sort';
+import { TFunction } from 'next-i18next';
 import dynamic from 'next/dynamic';
 import { useSnackbar } from 'notistack';
-import React, { useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import useSWR from 'swr';
+import { Waypoint } from 'react-waypoint';
+import { useSWRInfinite } from 'swr';
 
 import CampaignListItem from './CampaignListItem';
+import Menu from './MenuWithTrigger';
 import Section from './Section';
 
 const CampaignDialog = dynamic(() => import('./CampaignDialog'), {
@@ -30,6 +36,29 @@ export type CampaignListProps = {
   className?: string;
 };
 
+const getSortOptions = (t: TFunction) =>
+  useMemo<{ text: string; value: ValidSort }[]>(
+    () => [
+      {
+        text: t('urgency') as string,
+        value: 'urgency',
+      },
+      {
+        text: t('name') as string,
+        value: 'name',
+      },
+      {
+        text: t('date_added_ascending') as string,
+        value: 'dateAddedAsc',
+      },
+      {
+        text: t('date_added_descending') as string,
+        value: 'dateAddedDesc',
+      },
+    ],
+    [t]
+  );
+
 const useStyles = makeStyles(({ spacing }) => ({
   item: {
     maxWidth: '100%',
@@ -37,12 +66,14 @@ const useStyles = makeStyles(({ spacing }) => ({
     flexDirection: 'column',
   },
   searchField: {
-    margin: spacing(0, 3),
     maxWidth: '200px',
   },
   searchIcon: {
     pointerEvents: 'none',
     cursor: 'pointer',
+  },
+  sortIcon: {
+    margin: spacing(0, 2),
   },
 }));
 
@@ -55,11 +86,22 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const [isDialogLoading, setIsDialogLoading] = useState(false);
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
   const [deleteRecord, setDeleteCampaign] = useState<Campaign | null>(null);
-  const { data, revalidate, mutate } = useSWR<Campaign[]>(
-    `/api/campaigns?search=${searchValue}`,
-    fetchJson
+  const [sortValue, setSortValue] = useState<ValidSort>('urgency');
+
+  const getSWRKey = useCallback(
+    (page: number, previousPageData: Campaign[] | null) => {
+      console.log('getSWRKey', { page });
+      if (previousPageData && !previousPageData.length) return null;
+      return `/api/campaigns?search=${searchValue}&sort=${sortValue}&page=${page}`;
+    },
+    [searchValue, sortValue]
   );
+
+  const { data, revalidate, mutate, size, setSize } = useSWRInfinite<
+    Campaign[]
+  >(getSWRKey, fetchJson);
   const { enqueueSnackbar } = useSnackbar();
+  const sortOptions = getSortOptions(t);
 
   const handleSaveCampaign = async ({
     influencers,
@@ -118,6 +160,8 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
     setIsDialogLoading(false);
   };
 
+  const lastPage = (data?.length ?? 1) - 1;
+
   return (
     <>
       <Section
@@ -143,6 +187,21 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
                 ),
               }}
             />
+            <Menu
+              id="campaign-sort"
+              triggerClassName={classes.sortIcon}
+              trigger={
+                <Tooltip title={t('sort_campaigns') as string}>
+                  <SortIcon />
+                </Tooltip>
+              }
+            >
+              {sortOptions.map(({ text, value }) => (
+                <Menu.Item key={value} onClick={() => setSortValue(value)}>
+                  {text}
+                </Menu.Item>
+              ))}
+            </Menu>
             <Button
               variant="contained"
               color="primary"
@@ -161,20 +220,36 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
       >
         <Grid container direction="column" spacing={2}>
           {!data ? (
-            <CircularProgress style={{ margin: 'auto' }} />
-          ) : data.length === 0 ? (
+            <CircularProgress style={{ margin: '12px auto' }} />
+          ) : data[0].length === 0 ? (
             t('no_campaigns')
           ) : (
-            data.map((campaign) => (
-              <Grid item className={classes.item} key={String(campaign._id)}>
-                <CampaignListItem
-                  campaign={campaign}
-                  mutate={mutate}
-                  setDeleteCampaign={setDeleteCampaign}
-                  setEditCampaign={setEditCampaign}
-                />
-              </Grid>
-            ))
+            data.map((campaigns, pageIndex) => {
+              const isLastPage =
+                lastPage === pageIndex && campaigns.length === 10;
+              return campaigns.map((campaign, index) => {
+                return (
+                  <Fragment key={String(campaign._id)}>
+                    {isLastPage && index === 9 && (
+                      <Waypoint
+                        onEnter={() => {
+                          console.log('ON ENTER', { size, pageIndex });
+                          setSize(Math.max(size, pageIndex + 2));
+                        }}
+                      />
+                    )}
+                    <Grid item className={classes.item}>
+                      <CampaignListItem
+                        campaign={campaign}
+                        mutate={mutate}
+                        setDeleteCampaign={setDeleteCampaign}
+                        setEditCampaign={setEditCampaign}
+                      />
+                    </Grid>
+                  </Fragment>
+                );
+              });
+            })
           )}
         </Grid>
       </Section>

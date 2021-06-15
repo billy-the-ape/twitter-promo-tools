@@ -2,7 +2,8 @@ import { Campaign, SubmittedTweet } from '@/types';
 import { FilterQuery, ObjectId } from 'mongodb';
 
 import type { CampaignAggregationOption } from './campaignAggregations';
-import * as campaignAggregations from './campaignAggregations';
+import { completionPercentage, fullUsers } from './campaignAggregations';
+import { ValidSort, sortMap } from './campaignSorts';
 import { getCollection, getUserCampaignPermissions } from './util';
 
 export const upsertCampaign = async (userId: string, campaign: Campaign) => {
@@ -74,7 +75,10 @@ export const getCampaigns = async (
   userId: string,
   query: FilterQuery<Campaign>,
   searchText: string = '',
-  aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {}
+  aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {},
+  sort?: keyof typeof sortMap,
+  pageNum = 0,
+  pageSize = 10
 ): Promise<Campaign[]> => {
   const collection = await getCollection('campaigns');
 
@@ -93,15 +97,17 @@ export const getCampaigns = async (
         },
       },
     },
-    ...Object.entries(aggregationOptions).reduce<object[]>(
-      (agg, [key, value]) => {
-        if (value) {
-          agg.push(...campaignAggregations[key as CampaignAggregationOption]);
-        }
-        return agg;
+    {
+      $addFields: {
+        userTweets: {
+          $filter: {
+            input: '$submittedTweets',
+            as: 'tweet',
+            cond: { $eq: ['$$tweet.authorId', userId] },
+          },
+        },
       },
-      []
-    ),
+    },
   ];
 
   if (searchText?.trim() ?? '' !== '') {
@@ -118,7 +124,36 @@ export const getCampaigns = async (
     });
   }
 
-  const result = await collection.aggregate(agg).toArray();
+  if (aggregationOptions.completionPercentage) {
+    agg.push(...completionPercentage);
+  }
+
+  if (sort) {
+    agg.push(sortMap[sort]);
+  }
+
+  // PAGINATION
+  agg.push(
+    ...[
+      {
+        $skip: pageNum * pageSize,
+      },
+      {
+        $limit: pageSize,
+      },
+    ]
+  );
+
+  if (aggregationOptions.fullUsers) {
+    agg.push(...fullUsers);
+  }
+
+  const result = await collection
+    .aggregate(agg, {
+      // TODO: possibly pass user locale
+      collation: { locale: 'en', caseFirst: 'lower' },
+    })
+    .toArray();
 
   return result.map((campaign) => {
     const permissions = getUserCampaignPermissions(userId, campaign);
@@ -149,7 +184,10 @@ export const getCampaigns = async (
 export const getCampaignsForUser = async (
   userId: string,
   searchText?: string,
-  aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {}
+  aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {},
+  sort?: ValidSort,
+  pageNum = 0,
+  pageSize = 10
 ): Promise<Campaign[]> => {
   return await getCampaigns(
     userId,
@@ -161,7 +199,10 @@ export const getCampaignsForUser = async (
       ],
     },
     searchText,
-    aggregationOptions
+    aggregationOptions,
+    sort,
+    pageNum,
+    pageSize
   );
 };
 

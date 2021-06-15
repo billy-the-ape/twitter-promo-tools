@@ -5,6 +5,7 @@ import { ReactNode, useState } from 'react';
 export type MenuWithTriggerProps = Omit<MenuProps, 'open'> & {
   id: string;
   trigger?: ReactNode;
+  triggerClassName?: string;
   children: ReactNode[];
 };
 
@@ -16,6 +17,7 @@ const MenuWithTrigger: React.FC<MenuWithTriggerProps> = ({
   id,
   trigger = <MenuIcon />,
   children,
+  triggerClassName,
   ...menuProps
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -37,6 +39,7 @@ const MenuWithTrigger: React.FC<MenuWithTriggerProps> = ({
         aria-controls={id + '-menu'}
         aria-haspopup="true"
         onClick={handleClick}
+        className={triggerClassName}
       >
         {trigger}
       </IconButton>

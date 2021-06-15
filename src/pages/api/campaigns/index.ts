@@ -1,4 +1,5 @@
 import { getCampaignsForUser, upsertCampaign } from '@/mongo/campaigns';
+import { ValidSort } from '@/mongo/campaignSorts';
 import { Campaign, Session } from '@/types';
 import type { NextApiHandler } from 'next';
 import { getSession } from 'next-auth/client';
@@ -10,20 +11,25 @@ const handler: NextApiHandler = async (req, res) => {
     const {
       body,
       method,
-      query: { search },
+      query: { search, sort, page },
     } = req;
 
     switch (method) {
       case 'GET':
+        const realSort = (
+          !!sort && !Array.isArray(sort) ? sort : 'urgency'
+        ) as ValidSort;
+        const realPage = !!page && !Array.isArray(page) ? Number(page) : 0;
         res.status(200).json(
           await getCampaignsForUser(
             session.user.id,
             typeof search === 'string' && search !== '' ? search : undefined,
             {
               fullUsers: true,
-              datePercentage: true,
-              tweetPercentage: true,
-            }
+              completionPercentage: true,
+            },
+            realSort,
+            realPage
           )
         );
         return;
