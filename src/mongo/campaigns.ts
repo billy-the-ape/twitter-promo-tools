@@ -165,11 +165,14 @@ export const getCampaigns = async (
     }
     userTweets?.sort(
       ({ createdAt: createdAtA }, { createdAt: createdAtB }) =>
-        createdAtB?.getTime() ?? 0 - createdAtA?.getTime() ?? 0
+        createdAtB.valueOf() - createdAtA.valueOf()
     );
+    if (userTweets?.length === 2) {
+      console.log({ userTweets });
+    }
     submittedTweets?.sort(
       ({ createdAt: createdAtA }, { createdAt: createdAtB }) =>
-        createdAtB?.getTime() ?? 0 - createdAtA?.getTime() ?? 0
+        createdAtB.valueOf() - createdAtA.valueOf()
     );
 
     return {
