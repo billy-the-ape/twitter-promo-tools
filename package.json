@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "build-static": "next build && next export",
-    "start": "next start",
+    "start": "next start -p $PORT",
     "lint": "eslint --ext ts --ext tsx --ext js",
     "format": "prettier --write .",
     "type-check": "tsc --pretty --noEmit"
