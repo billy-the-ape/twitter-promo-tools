@@ -237,7 +237,7 @@ export const deleteTweet = async (
     { _id },
     { $set: { submittedTweets: updatedTweets } }
   );
-  await tweetCollection.deleteOne({ id: tweetId });
+  await tweetCollection.deleteMany({ id: tweetId });
 
   return 204;
 };
@@ -264,7 +264,7 @@ export const addTweetToCampaign = async (
   const existingTweet = await tweetCollection.findOne({ id });
 
   // Tweet is already submitted and not a manager
-  if (existingTweet !== null && !manager) {
+  if (existingTweet !== null) {
     return 409;
   }
 
