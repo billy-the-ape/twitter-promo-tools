@@ -17,6 +17,9 @@ const lightTheme: ThemeOptions = {
         a: {
           color: LIGHT_PRIMARY_COLOR,
           textDecoration: 'none',
+          ':root': {
+            colorScheme: 'light',
+          },
           '&:visited': {
             color: LIGHT_PRIMARY_COLOR,
           },
