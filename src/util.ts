@@ -1,4 +1,5 @@
 import { SubmittedTweet, TwitterUser, User, UserBase } from '@/types';
+import { SyntheticEvent } from 'react';
 
 import { GREEN, RED, YELLOW } from './constants';
 
@@ -201,3 +202,10 @@ export const debounce = (fn: Function, timeout: number): Function => {
     return timeoutId;
   };
 };
+
+export const stopPropagationCallback =
+  <TFn extends Function>(fn: TFn) =>
+  (e: { stopPropagation: Function }) => {
+    e.stopPropagation();
+    return fn();
+  };

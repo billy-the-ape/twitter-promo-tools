@@ -1,5 +1,6 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign } from '@/types';
+import { stopPropagationCallback } from '@/util';
 import {
   Box,
   IconButton,
@@ -39,7 +40,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
   return isSm ? (
     <Menu id={`menu-${campaign._id}`}>
       {onSubmitTweet && isInfluencer && (
-        <Menu.Item onClick={onSubmitTweet}>
+        <Menu.Item onClick={stopPropagationCallback(onSubmitTweet)}>
           <ListItemIcon>
             <TwitterIcon fontSize="small" />
           </ListItemIcon>
@@ -47,7 +48,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
         </Menu.Item>
       )}
       {onEditCampaign && isManager && (
-        <Menu.Item onClick={onEditCampaign}>
+        <Menu.Item onClick={stopPropagationCallback(onEditCampaign)}>
           <ListItemIcon>
             <EditIcon fontSize="small" />
           </ListItemIcon>
@@ -55,7 +56,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
         </Menu.Item>
       )}
       {onDeleteCampaign && isOwner && (
-        <Menu.Item onClick={onDeleteCampaign}>
+        <Menu.Item onClick={stopPropagationCallback(onDeleteCampaign)}>
           <ListItemIcon>
             <DeleteIcon fontSize="small" />
           </ListItemIcon>
@@ -67,21 +68,21 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
     <Box display="flex">
       {onSubmitTweet && isInfluencer && (
         <Tooltip title={t('submit_tweet') as string}>
-          <IconButton onClick={onSubmitTweet}>
+          <IconButton onClick={stopPropagationCallback(onSubmitTweet)}>
             <TwitterIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
       {onEditCampaign && isManager && (
         <Tooltip title={t('edit') as string}>
-          <IconButton onClick={onEditCampaign}>
+          <IconButton onClick={stopPropagationCallback(onEditCampaign)}>
             <EditIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
       {onDeleteCampaign && isOwner && (
         <Tooltip title={t('delete') as string}>
-          <IconButton onClick={onDeleteCampaign}>
+          <IconButton onClick={stopPropagationCallback(onDeleteCampaign)}>
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
