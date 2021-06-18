@@ -17,6 +17,7 @@ const handler: NextApiHandler = async (req, res) => {
       });
       if (!campaigns || !campaigns.length) {
         res.status(404).send({});
+        return;
       }
       const statusCode = await deleteTweet(
         session.user.id,

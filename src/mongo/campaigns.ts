@@ -243,7 +243,9 @@ export const addTweetToCampaign = async (
 
   // This is extra to guarantee we don't accidentally wipe out campaign tweets
   if (!submittedTweets || submittedTweets.length === 0) {
-    const [{ submittedTweets: s2 = [] }] = await getCampaigns(userId, { _id });
+    const [{ submittedTweets: s2 = [] } = {}] = await getCampaigns(userId, {
+      _id,
+    });
     submittedTweets = s2 || [];
   }
 

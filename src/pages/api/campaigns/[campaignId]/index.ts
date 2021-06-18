@@ -42,6 +42,7 @@ const handler: NextApiHandler = async (req, res) => {
       }
       const [campaign] = campaigns;
 
+      // Check tweet is from current user or manager
       if (
         !campaign.permissions?.manager &&
         tweetResult.some(({ author_id }) => {
@@ -52,7 +53,6 @@ const handler: NextApiHandler = async (req, res) => {
         return;
       }
 
-      // Check tweet is from current user or manager
       const resultsArray: number[] = [];
       for (const {
         id,
@@ -74,6 +74,7 @@ const handler: NextApiHandler = async (req, res) => {
 
       if (failResponse) {
         res.status(failResponse).send(resultsArray);
+        return;
       }
 
       res.status(204).send({});

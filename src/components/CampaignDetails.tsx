@@ -127,28 +127,32 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
                 onDelete={handleTweetDelete}
                 campaignName={campaign.name}
               />
-              {(!!campaign.submittedTweets || !!campaign.datePercentage) &&
-                !!campaign.tweetCount &&
-                !!campaign.influencers && (
-                  <CampaignCompletion
-                    title={t('campaign_completion_stats')}
-                    tweetPercentage={
-                      (campaign.submittedTweets?.length ?? 0) /
-                      (campaign.tweetCount * campaign.influencers.length)
+              {campaign.permissions?.manager && (
+                <>
+                  {(!!campaign.submittedTweets || !!campaign.datePercentage) &&
+                    !!campaign.tweetCount &&
+                    !!campaign.influencers && (
+                      <CampaignCompletion
+                        title={t('campaign_completion_stats')}
+                        tweetPercentage={
+                          (campaign.submittedTweets?.length ?? 0) /
+                          (campaign.tweetCount * campaign.influencers.length)
+                        }
+                        datePercentage={campaign.datePercentage}
+                      />
+                    )}
+                  <TweetList
+                    tweets={
+                      campaign.submittedTweets?.filter(
+                        ({ authorId }) => authorId !== user.id
+                      ) || []
                     }
-                    datePercentage={campaign.datePercentage}
+                    campaignName={campaign.name}
+                    users={campaign.users || []}
+                    onDelete={handleTweetDelete}
                   />
-                )}
-              <TweetList
-                tweets={
-                  campaign.submittedTweets?.filter(
-                    ({ authorId }) => authorId !== user.id
-                  ) || []
-                }
-                campaignName={campaign.name}
-                users={campaign.users || []}
-                onDelete={handleTweetDelete}
-              />
+                </>
+              )}
             </Box>
           </Collapse>
         </Box>
