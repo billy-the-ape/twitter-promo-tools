@@ -32,9 +32,13 @@ const handler: NextApiHandler = async (req, res) => {
         return;
       }
 
-      const campaigns = await getCampaigns(session.user.id, {
-        _id: new ObjectId(campaignId),
-      });
+      const campaigns = await getCampaigns(
+        session.user.id,
+        {
+          _id: new ObjectId(campaignId),
+        },
+        false
+      );
       if (!campaigns || !campaigns.length) {
         console.error('CAMPAIGN NOT FOUND');
         res.status(404).send({});
@@ -90,9 +94,13 @@ const handler: NextApiHandler = async (req, res) => {
       return;
     }
     case 'GET': {
-      const campaigns = await getCampaigns(session.user.id, {
-        _id: { $in: idsArray },
-      });
+      const campaigns = await getCampaigns(
+        session.user.id,
+        {
+          _id: { $in: idsArray },
+        },
+        true
+      );
       res.status(200).json(campaigns);
     }
   }

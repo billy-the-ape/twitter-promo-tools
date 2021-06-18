@@ -60,7 +60,7 @@ export const upsertCampaign = async (userId: string, campaign: Campaign) => {
 };
 
 export const deleteCampaigns = async (userId: string, ids: ObjectId[]) => {
-  const campaigns = await getCampaigns(userId, { _id: { $in: ids } });
+  const campaigns = await getCampaigns(userId, { _id: { $in: ids } }, false);
   const userOwnsAll = !campaigns.filter(({ creator }) => creator !== userId)
     .length;
   if (!userOwnsAll) {
@@ -74,6 +74,7 @@ export const deleteCampaigns = async (userId: string, ids: ObjectId[]) => {
 export const getCampaigns = async (
   userId: string,
   query: FilterQuery<Campaign>,
+  userOnly: boolean,
   searchText: string = '',
   aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {},
   sort?: keyof typeof sortMap,
@@ -149,7 +150,7 @@ export const getCampaigns = async (
     let { submittedTweets, userTweets } = campaign;
 
     // Managers can see all tweets
-    if (!permissions.manager) {
+    if (!permissions.manager && userOnly) {
       submittedTweets = userTweets;
     }
     userTweets?.sort(
@@ -187,6 +188,7 @@ export const getCampaignsForUser = async (
         { influencers: { $elemMatch: { id: userId } } },
       ],
     },
+    true,
     searchText,
     aggregationOptions,
     sort,
@@ -241,12 +243,8 @@ export const addTweetToCampaign = async (
   const { _id } = campaign;
   let { submittedTweets } = campaign;
 
-  // This is extra to guarantee we don't accidentally wipe out campaign tweets
-  if (!submittedTweets || submittedTweets.length === 0) {
-    const [{ submittedTweets: s2 = [] } = {}] = await getCampaigns(userId, {
-      _id,
-    });
-    submittedTweets = s2 || [];
+  if (!submittedTweets) {
+    submittedTweets = [];
   }
 
   const { influencer, manager } = campaign.permissions || {};

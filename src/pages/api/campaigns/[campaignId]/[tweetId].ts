@@ -12,9 +12,13 @@ const handler: NextApiHandler = async (req, res) => {
   };
   switch (req.method) {
     case 'DELETE':
-      const campaigns = await getCampaigns(session.user.id, {
-        _id: new ObjectId(campaignId),
-      });
+      const campaigns = await getCampaigns(
+        session.user.id,
+        {
+          _id: new ObjectId(campaignId),
+        },
+        false
+      );
       if (!campaigns || !campaigns.length) {
         res.status(404).send({});
         return;
