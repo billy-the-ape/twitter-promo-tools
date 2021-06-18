@@ -51,7 +51,9 @@ const handler: NextApiHandler = async (req, res) => {
         res.status(400).send({});
         return;
       }
+
       // Check tweet is from current user or manager
+      const resultsArray: number[] = [];
       for (const {
         id,
         author_id: authorId,
@@ -65,10 +67,13 @@ const handler: NextApiHandler = async (req, res) => {
           new Date(createdAt)
         );
 
-        if (result !== 204) {
-          res.status(result).send({});
-          return;
-        }
+        resultsArray.push(result);
+      }
+
+      const failResponse = resultsArray.find((code) => code !== 204);
+
+      if (failResponse) {
+        res.status(failResponse).send(resultsArray);
       }
 
       res.status(204).send({});
