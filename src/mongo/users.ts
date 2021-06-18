@@ -25,3 +25,15 @@ export const getUsers = async (filter: FilterQuery<User>) => {
 
   return await collection.find(filter).toArray();
 };
+
+export const seenUser = async (id: string) => {
+  const collection = await getCollection('users');
+  collection.updateOne(
+    { id },
+    {
+      $set: {
+        lastSeenDate: new Date(),
+      },
+    }
+  );
+};

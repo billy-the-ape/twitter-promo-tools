@@ -1,6 +1,5 @@
 import { User } from '@/types';
-import { Restaurant } from '@material-ui/icons';
-import { upsertUser } from 'mongo/users';
+import { seenUser, upsertUser } from 'mongo/users';
 import NextAuth from 'next-auth';
 import Providers from 'next-auth/providers';
 
@@ -104,6 +103,8 @@ export default NextAuth({
           id: user.sub as string, // Add twitter id for db interactions
         },
       };
+
+      seenUser(s.user.id);
 
       return s;
     },
