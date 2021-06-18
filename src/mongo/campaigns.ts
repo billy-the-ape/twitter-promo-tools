@@ -97,17 +97,6 @@ export const getCampaigns = async (
         },
       },
     },
-    {
-      $addFields: {
-        userTweets: {
-          $filter: {
-            input: '$submittedTweets',
-            as: 'tweet',
-            cond: { $eq: ['$$tweet.authorId', userId] },
-          },
-        },
-      },
-    },
   ];
 
   if (searchText?.trim() ?? '' !== '') {
@@ -167,9 +156,6 @@ export const getCampaigns = async (
       ({ createdAt: createdAtA }, { createdAt: createdAtB }) =>
         createdAtB.valueOf() - createdAtA.valueOf()
     );
-    if (userTweets?.length === 2) {
-      console.log({ userTweets });
-    }
     submittedTweets?.sort(
       ({ createdAt: createdAtA }, { createdAt: createdAtB }) =>
         createdAtB.valueOf() - createdAtA.valueOf()
@@ -252,12 +238,13 @@ export const addTweetToCampaign = async (
   userId: string,
   createdAt: Date
 ) => {
-  const { _id, submittedTweets = [] } = campaign;
+  const { _id } = campaign;
+  let { submittedTweets } = campaign;
 
   // This is extra to guarantee we don't accidentally wipe out campaign tweets
-  if (submittedTweets.length === 0) {
+  if (!submittedTweets || submittedTweets.length === 0) {
     const [{ submittedTweets: s2 = [] }] = await getCampaigns(userId, { _id });
-    submittedTweets.push(...s2);
+    submittedTweets = s2 || [];
   }
 
   const { influencer, manager } = campaign.permissions || {};
