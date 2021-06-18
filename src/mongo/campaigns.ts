@@ -254,6 +254,12 @@ export const addTweetToCampaign = async (
 ) => {
   const { _id, submittedTweets = [] } = campaign;
 
+  // This is extra to guarantee we don't accidentally wipe out campaign tweets
+  if (submittedTweets.length === 0) {
+    const [{ submittedTweets: s2 = [] }] = await getCampaigns(userId, { _id });
+    submittedTweets.push(...s2);
+  }
+
   const { influencer, manager } = campaign.permissions || {};
 
   // User isn't a manager or influencer on the campaign
