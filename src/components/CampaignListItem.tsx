@@ -44,6 +44,19 @@ const useStyles = makeStyles<Theme, { isExpanded: boolean }>(
   ({ breakpoints, spacing, palette }) => ({
     campaignItemRoot: {
       backgroundColor: palette.background.default,
+      position: 'relative',
+    },
+    completedOverlay: {
+      position: 'absolute',
+      pointerEvents: 'none',
+      backgroundColor: palette.background.default,
+      opacity: 0.7,
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      zIndex: 50,
+      borderRadius: spacing(1),
     },
     spaced: {
       margin: spacing(0, 1),
@@ -119,6 +132,9 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   const { enqueueSnackbar } = useSnackbar();
   const classes = useStyles({ isExpanded });
   const hasDetailsExpanded = useIsInitialized(isExpanded);
+  const completed =
+    campaign.tweetCount &&
+    campaign.tweetCount <= (campaign.userTweets?.length ?? 0);
 
   const handleTweetSubmit = async () => {
     const links = tweetLink.split(/\s/);
@@ -205,6 +221,9 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
           )
         }
       >
+        {completed && !isExpanded && (
+          <div className={classes.completedOverlay}>&nbsp;</div>
+        )}
         <Box
           width="100%"
           display="flex"
