@@ -49,6 +49,10 @@ const useStyles = makeStyles(({ spacing }) => ({
   marginLeft: {
     marginLeft: spacing(2),
   },
+  avatars: {
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
 }));
 
 const CampaignDetails: React.FC<CampaignDetailsProps> = ({
@@ -167,6 +171,8 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
         {campaign.influencers && !!campaign.influencers.length && (
           <Hidden smUp>
             <AvatarGroup
+              tabIndex={0}
+              className={classes.avatars}
               onClick={() => setExpandMembers(!expandMembers)}
               spacing="small"
               max={15}

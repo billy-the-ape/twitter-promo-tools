@@ -25,16 +25,17 @@ export type TweetListProps = {
   onDelete: (id: string) => void;
 };
 
-const useStyles = makeStyles(({ spacing, breakpoints }) => ({
+const useStyles = makeStyles(({ spacing }) => ({
   linkAvatar: {
     height: spacing(3),
     width: spacing(3),
     marginRight: spacing(1),
   },
-  linkBox: {
-    [breakpoints.down('sm')]: {
-      justifyContent: 'space-around',
-    },
+  link: {
+    flex: '0 0 55%',
+  },
+  date: {
+    flex: '0 0 10%',
   },
 }));
 
@@ -62,25 +63,23 @@ const TweetList: React.FC<TweetListProps> = ({
             users.find(({ id }) => id === authorId) || {};
           const link = `twitter.com/${screenName}/status/${id}`;
           return (
-            <Box
-              key={id}
-              className={classes.linkBox}
-              display="flex"
-              alignItems="center"
-            >
+            <Box key={id} display="flex" alignItems="center">
               <Avatar className={classes.linkAvatar} src={image!}>
                 {screenName?.substr(0, 1).toLocaleUpperCase()}
               </Avatar>
-              <Link href={`https://${link}`} target="_blank">
-                <Typography variant="inherit">
-                  {isMobile ? `...${link.substring(20)}` : link}
-                </Typography>
-              </Link>
-              <Typography variant="body2">
-                <Hidden smDown>&nbsp;-&nbsp;</Hidden>
+              <Typography className={classes.date} variant="body2">
                 {formatDate(createdAt)}
               </Typography>
-              <Box ml={2}>
+              <Link
+                className={classes.link}
+                href={`https://${link}`}
+                target="_blank"
+              >
+                <Typography variant="inherit">
+                  {isMobile ? `...${link.substring(23)}` : link}
+                </Typography>
+              </Link>
+              <Box justifySelf="flex-end" flex="0 0 10%" ml={2}>
                 <Tooltip title={t('delete_tweet') as string}>
                   <IconButton
                     onClick={() => setDeleteObj({ id, screenName })}
