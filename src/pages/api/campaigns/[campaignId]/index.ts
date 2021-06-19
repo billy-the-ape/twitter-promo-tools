@@ -1,9 +1,9 @@
 import {
-  addTweetToCampaign,
+  addTweetsToCampaign,
   deleteCampaigns,
   getCampaigns,
 } from '@/mongo/campaigns';
-import { Session } from '@/types';
+import { Session, SubmittedTweet } from '@/types';
 import { fetchTwitterApi } from '@/util';
 import { ObjectId } from 'mongodb';
 import type { NextApiHandler } from 'next';
@@ -57,8 +57,20 @@ const handler: NextApiHandler = async (req, res) => {
         return;
       }
 
-      const resultsArray: number[] = [];
-      for (const {
+      const submittedTweets: SubmittedTweet[] = tweetResult.map(
+        ({ id, author_id: authorId, created_at: createdAt }) => ({
+          id,
+          authorId,
+          createdAt: new Date(createdAt),
+        })
+      );
+
+      const resultsArray = await addTweetsToCampaign(
+        session.user.id,
+        campaign,
+        submittedTweets
+      );
+      /* for (const {
         id,
         author_id: authorId,
         created_at: createdAt,
@@ -72,7 +84,7 @@ const handler: NextApiHandler = async (req, res) => {
         );
 
         resultsArray.push(result);
-      }
+      } */
 
       const failResponse = resultsArray.find((code) => code !== 204);
 

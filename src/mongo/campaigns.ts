@@ -233,7 +233,60 @@ export const deleteTweet = async (
   return 204;
 };
 
-export const addTweetToCampaign = async (
+export const addTweetsToCampaign = async (
+  userId: string,
+  campaign: Campaign,
+  tweets: SubmittedTweet[]
+): Promise<number[]> => {
+  if (!campaign.submittedTweets) {
+    campaign.submittedTweets = [];
+  }
+
+  const { influencer, manager } = campaign.permissions || {};
+
+  if (!influencer && !manager) {
+    return [403];
+  }
+
+  const collection = await getCollection('campaigns');
+  const tweetCollection = await getCollection('tweets');
+
+  const results: number[] = [];
+
+  for (const tweet of tweets) {
+    const existingTweet = await tweetCollection.findOne({ id: tweet.id });
+
+    // Tweet is already submitted and not a manager
+    if (existingTweet !== null) {
+      results.push(409);
+      continue;
+    }
+
+    // Semi rare case where manager or owner submits a user's tweet
+    // make sure the author is an influencer on the project
+    if (
+      userId !== tweet.authorId &&
+      !campaign.influencers?.some(({ id }) => id === tweet.authorId)
+    ) {
+      results.push(418); // I'm a teapot
+      continue;
+    }
+
+    await tweetCollection.insertOne(tweet);
+    campaign.submittedTweets.push(tweet);
+
+    results.push(204);
+  }
+
+  await collection.updateOne(
+    { _id: campaign._id },
+    { $set: { submittedTweets: campaign.submittedTweets } }
+  );
+
+  return results;
+};
+
+/* export const addTweetToCampaign = async (
   id: string,
   campaign: Campaign,
   authorId: string,
@@ -241,10 +294,9 @@ export const addTweetToCampaign = async (
   createdAt: Date
 ) => {
   const { _id } = campaign;
-  let { submittedTweets } = campaign;
 
-  if (!submittedTweets) {
-    submittedTweets = [];
+  if (!campaign.submittedTweets) {
+    campaign.submittedTweets = [];
   }
 
   const { influencer, manager } = campaign.permissions || {};
@@ -279,10 +331,14 @@ export const addTweetToCampaign = async (
     createdAt,
   };
 
-  submittedTweets.push(newTweet);
+  campaign.submittedTweets.push(newTweet);
 
-  await collection.updateOne({ _id }, { $set: { submittedTweets } });
+  await collection.updateOne(
+    { _id },
+    { $set: { submittedTweets: campaign.submittedTweets } }
+  );
   await tweetCollection.insertOne(newTweet);
 
   return 204;
 };
+ */
