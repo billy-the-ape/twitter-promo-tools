@@ -229,6 +229,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
                   remarkPlugins={[gfm]}
                   className={classes.markDown}
                   key={i}
+                  linkTarget="_blank"
                 >
                   {desc}
                 </ReactMarkdown>
