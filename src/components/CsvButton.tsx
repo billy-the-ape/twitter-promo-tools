@@ -1,4 +1,5 @@
 import { Campaign } from '@/types';
+import { formatDate } from '@/util';
 import { Button } from '@material-ui/core';
 import { parse } from 'json2csv';
 
@@ -15,17 +16,20 @@ const CsvButton: React.FC<CsvButtonProps> = ({
     return null;
   }
 
-  const fields = ['Influencer'];
-  let maxTweetsByUser = 0;
+  const fields: string[] = [];
 
-  const data = [...users]
-    .sort(({ screenName: a }, { screenName: b }) => a!.localeCompare(b!))
-    .reduce<Record<string, string>[]>((acc, user) => {
-      const tweets = submittedTweets.filter(
-        ({ authorId }) => authorId === user.id
-      );
+  let data: any;
 
-      if (tweets.length > 0) {
+  if (users.length > 1) {
+    fields.push('Influencer');
+    let maxTweetsByUser = 0;
+    data = [...users]
+      .sort(({ screenName: a }, { screenName: b }) => a!.localeCompare(b!))
+      .reduce<Record<string, string>[]>((acc, user) => {
+        const tweets = submittedTweets.filter(
+          ({ authorId }) => authorId === user.id
+        );
+
         maxTweetsByUser = Math.max(maxTweetsByUser, tweets.length);
 
         const influencer = `twitter.com/${user.screenName}`;
@@ -39,20 +43,31 @@ const CsvButton: React.FC<CsvButtonProps> = ({
         row.Influencer = influencer;
 
         acc.push(row);
-      }
 
-      return acc;
-    }, []);
-
-  for (let i = 0; i < maxTweetsByUser; i++) {
-    fields.push(`Tweet ${i + 1}`);
+        return acc;
+      }, []);
+    for (let i = 0; i < maxTweetsByUser; i++) {
+      fields.push(`Tweet ${i + 1}`);
+    }
+  } else if (users.length === 1) {
+    const influencer = `twitter.com/${users[0].screenName}`;
+    fields.push('Tweet', 'Date');
+    data = submittedTweets
+      .sort(({ createdAt: a }, { createdAt: b }) => a.valueOf() - b.valueOf())
+      .reduce<Record<string, string>[]>((acc, { id, createdAt }) => {
+        acc.push({
+          Tweet: `${influencer}/status/${id}`,
+          Date: formatDate(createdAt),
+        });
+        return acc;
+      }, []);
   }
 
-  if (!data) return null;
+  if (!data || !data.length) return null;
   const csv = parse(data, { fields });
 
-  var blob = new Blob(['\ufeff', csv]);
-  var url = URL.createObjectURL(blob);
+  const blob = new Blob(['\ufeff', csv]);
+  const url = URL.createObjectURL(blob);
 
   return (
     <Button
