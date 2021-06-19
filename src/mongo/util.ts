@@ -15,27 +15,38 @@ export const getUserCampaignPermissions = (
 });
 
 // Create cached connection variable
-let cachedDb: Db;
+let cachedClient: MongoClient;
+let cachedDb: Db | null;
+let cacheCreationTime = 0;
+// Close connection every 5 minutes
+const CACHE_LIMIT = 60000 * 5;
 
-// A function for connecting to MongoDB,
-// taking a single parameter of the connection string
 export const connectToDatabase = async (): Promise<Db> => {
   const uri = process.env.MONGODB_URI!;
   // If the database connection is cached,
   // use it instead of creating a new connection
-  if (cachedDb) {
+  const now = Date.now();
+
+  if (cachedClient && cacheCreationTime < now - CACHE_LIMIT) {
+    console.log('CLOSING CONNECTION');
+    cachedClient.close();
+    cachedDb = null;
+  } else if (cachedDb) {
+    console.log('USING CACHED DB');
     return cachedDb;
   }
 
+  cacheCreationTime = now;
+
   // If no connection is cached, create a new one
-  const client = await MongoClient.connect(uri, {
+  cachedClient = await MongoClient.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
   // Select the database through the connection,
   // using the database path of the connection string
   const dbName = new URL(uri).pathname.substr(1);
-  const db = client.db(dbName);
+  const db = cachedClient.db(dbName);
 
   // Cache the database connection and return the connection
   cachedDb = db;
