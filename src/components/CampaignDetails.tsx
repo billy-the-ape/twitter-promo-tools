@@ -21,6 +21,7 @@ import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
 import CampaignCompletion from './CampaignCompletion';
+import CsvButton from './CsvButton';
 import TweetList from './TweetList';
 import UserChip from './UserChip';
 import UserChipGrid from './UserChipGrid';
@@ -45,6 +46,9 @@ const useStyles = makeStyles(({ spacing }) => ({
     marginTop: spacing(-1),
     marginBottom: spacing(2),
   },
+  marginLeft: {
+    marginLeft: spacing(2),
+  },
 }));
 
 const CampaignDetails: React.FC<CampaignDetailsProps> = ({
@@ -62,7 +66,6 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   const [expandMembers, setExpandMembers] = useState(false);
   const isMobile = useIsMobile();
 
-  // TODO: maybe calculate percent complete and change chip color based on it
   const userSubMap = useMemo(
     () =>
       !campaign.permissions?.manager
@@ -103,15 +106,20 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
               {tweetString}
             </Typography>
           )}
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => setShowTweets(!showTweets)}
-          >
-            {showTweets
-              ? t('hide_submitted_tweets')
-              : t('show_submitted_tweets')}
-          </Button>
+          <Box display="flex">
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => setShowTweets(!showTweets)}
+            >
+              {showTweets
+                ? t('hide_submitted_tweets')
+                : t('show_submitted_tweets')}
+            </Button>
+            {campaign.permissions?.manager && (
+              <CsvButton className={classes.marginLeft} campaign={campaign} />
+            )}
+          </Box>
           <Collapse in={showTweets}>
             <Box mt={1}>
               {(!!campaign.tweetPercentage || !!campaign.datePercentage) && (
