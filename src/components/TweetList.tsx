@@ -25,7 +25,14 @@ export type TweetListProps = {
   onDelete: (id: string) => void;
 };
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ spacing, palette }) => ({
+  tweetBox: {
+    padding: spacing(0, 1),
+    borderRadius: '4px',
+    '&:hover': {
+      backgroundColor: palette.background.paper,
+    },
+  },
   linkAvatar: {
     height: spacing(3),
     width: spacing(3),
@@ -35,7 +42,8 @@ const useStyles = makeStyles(({ spacing }) => ({
     flex: '0 0 55%',
   },
   date: {
-    flex: '0 0 10%',
+    flex: '0 0 6%',
+    paddingLeft: spacing(1),
   },
 }));
 
@@ -63,7 +71,12 @@ const TweetList: React.FC<TweetListProps> = ({
             users.find(({ id }) => id === authorId) || {};
           const link = `twitter.com/${screenName}/status/${id}`;
           return (
-            <Box key={id} display="flex" alignItems="center">
+            <Box
+              className={classes.tweetBox}
+              key={id}
+              display="flex"
+              alignItems="center"
+            >
               <Avatar className={classes.linkAvatar} src={image!}>
                 {screenName?.substr(0, 1).toLocaleUpperCase()}
               </Avatar>
