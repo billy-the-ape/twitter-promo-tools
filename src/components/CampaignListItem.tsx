@@ -113,7 +113,7 @@ export type CampaignListItemProps = {
 };
 
 const TWEET_LINK_REGEX =
-  /^(https?:\/\/)?twitter.com\/(\w){1,15}\/status\/(?<id>[0-9]+)/i;
+  /^(https?:\/\/)?(mobile\.)?twitter.com\/(\w){1,15}\/status\/(?<id>[0-9]+)/i;
 
 const CampaignListItem: React.FC<CampaignListItemProps> = ({
   campaign,
@@ -137,13 +137,13 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
     campaign.tweetCount <= (campaign.userTweets?.length ?? 0);
 
   const handleTweetSubmit = async () => {
-    const links = tweetLink.split(/\s/);
+    const links = tweetLink.split(/\s/).filter((l) => !!l);
     const ids = [];
     for (const link of links) {
       const match = TWEET_LINK_REGEX.exec(link);
       if (!match) {
         setIsTweetLinkError(true);
-        return;
+        continue;
       }
       setIsTweetLinkError(false);
 
