@@ -5,15 +5,22 @@ import { Collection } from 'mongodb';
 export const getUserCampaignPermissions = (
   userId: string,
   campaign: Campaign
-): CampaignPermissions => ({
-  manager:
-    (campaign.creator === userId ||
-      campaign.managers?.some(({ id }) => id === userId)) ??
-    false,
-  owner: campaign.creator === userId,
-  influencer: campaign.influencers?.some(({ id }) => id === userId) ?? false,
-});
+): CampaignPermissions => {
+  const owner = campaign.creator === userId;
+  const manager =
+    owner || campaign.managers?.some(({ id }) => id === userId) || false;
+  const influencer =
+    (owner ||
+      manager ||
+      campaign.influencers?.some(({ id }) => id === userId)) ??
+    false;
 
+  return {
+    owner,
+    manager,
+    influencer,
+  };
+};
 // Create cached connection variable
 let cachedClient: MongoClient;
 let cachedDb: Db | null;

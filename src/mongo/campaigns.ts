@@ -264,10 +264,8 @@ export const addTweetsToCampaign = async (
 
     // Semi rare case where manager or owner submits a user's tweet
     // make sure the author is an influencer on the project
-    if (
-      userId !== tweet.authorId &&
-      !campaign.influencers?.some(({ id }) => id === tweet.authorId)
-    ) {
+    const { influencer } = getUserCampaignPermissions(tweet.authorId, campaign);
+    if (userId !== tweet.authorId && !influencer) {
       results.push(418); // I'm a teapot
       continue;
     }
@@ -285,60 +283,3 @@ export const addTweetsToCampaign = async (
 
   return results;
 };
-
-/* export const addTweetToCampaign = async (
-  id: string,
-  campaign: Campaign,
-  authorId: string,
-  userId: string,
-  createdAt: Date
-) => {
-  const { _id } = campaign;
-
-  if (!campaign.submittedTweets) {
-    campaign.submittedTweets = [];
-  }
-
-  const { influencer, manager } = campaign.permissions || {};
-
-  // User isn't a manager or influencer on the campaign
-  if (!influencer && !manager) {
-    return 403;
-  }
-
-  const collection = await getCollection('campaigns');
-  const tweetCollection = await getCollection('tweets');
-
-  const existingTweet = await tweetCollection.findOne({ id });
-
-  // Tweet is already submitted and not a manager
-  if (existingTweet !== null) {
-    return 409;
-  }
-
-  // Semi rare case where manager or owner submits a user's tweet
-  // make sure the author is an influencer on the project
-  if (
-    userId !== authorId &&
-    !campaign.influencers?.some(({ id }) => id === authorId)
-  ) {
-    return 418; // I'm a teapot
-  }
-
-  const newTweet: SubmittedTweet = {
-    id,
-    authorId,
-    createdAt,
-  };
-
-  campaign.submittedTweets.push(newTweet);
-
-  await collection.updateOne(
-    { _id },
-    { $set: { submittedTweets: campaign.submittedTweets } }
-  );
-  await tweetCollection.insertOne(newTweet);
-
-  return 204;
-};
- */
