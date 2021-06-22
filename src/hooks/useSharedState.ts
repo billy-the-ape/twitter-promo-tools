@@ -9,25 +9,35 @@ const STORAGE_KEY = 'state';
 // Add keys and values here to expand state items
 type SharedStateMap = {
   darkMode: boolean;
+  showHidden: boolean;
+  hiddenCampaigns: string[];
 };
+
+const createStateObj = (obj: SharedStateMap) => Object.entries(obj).reduce<GlobalState>(
+  (acc, [key, value]) => ({
+    ...acc,
+    [key]: new StateItem(value),
+  }),
+  {} as GlobalState
+);
 
 const getStoredState = (): GlobalState => {
   const storageStr = localStorage.getItem(STORAGE_KEY);
 
   // DEFINES DEFAULT STATE
-  let state: SharedStateMap = {
+  const defaultState: SharedStateMap = {
     darkMode: true,
+    showHidden: false,
+    hiddenCampaigns: [],
   };
+  let storedState = {} as SharedStateMap;
   if (storageStr) {
-    state = JSON.parse(storageStr) as SharedStateMap;
+    storedState = JSON.parse(storageStr) as SharedStateMap;
   }
-  return Object.entries(state).reduce<GlobalState>(
-    (acc, [key, value]) => ({
-      ...acc,
-      [key]: new StateItem(value),
-    }),
-    {} as GlobalState
-  );
+  return {
+    ...createStateObj(defaultState),
+    ...createStateObj(storedState),
+  }
 };
 
 const setStoredState = () => {

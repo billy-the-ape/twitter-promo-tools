@@ -63,5 +63,9 @@
 	"urgency": "Urgency",
 	"user_not_influencer": "Tweet author is not an influencer for that campaign.",
 	"user_select_explanation": "Enter twitter screen name with or without \"@\", or link to twitter profile.  You can paste multiple separated by space or new line.",
-	"your_completion_stats": "Your completion stats"
+	"your_completion_stats": "Your completion stats",
+	"hide_hidden_campaigns": "Hide hidden campaigns",
+	"show_hidden_campaigns": "Show hidden campaigns",
+	"hide_campaign": "Hide campaign",
+	"unhide_campaign": "Unhide campaign"
 }

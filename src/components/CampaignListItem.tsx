@@ -1,5 +1,6 @@
 import { useIsInitialized } from '@/hooks/useIsInitialized';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useSharedState } from '@/hooks/useSharedState';
 import { Campaign } from '@/types';
 import {
   calculatePercentOff,
@@ -135,6 +136,21 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   const completed =
     campaign.tweetCount &&
     campaign.tweetCount <= (campaign.userTweets?.length ?? 0);
+  const [hiddenCampaigns, setHiddenCampaigns] = useSharedState('hiddenCampaigns');
+  const [showHidden] = useSharedState('showHidden');
+
+  const campaignId = String(campaign._id);
+  const isHidden = hiddenCampaigns.includes(campaignId);
+
+  const handleToggleHideCampaign = () => {
+    const idx = hiddenCampaigns.indexOf(campaignId);
+    if (idx === -1) {
+      setHiddenCampaigns([...hiddenCampaigns, campaignId]);
+    } else {
+      hiddenCampaigns.splice(idx, 1);
+      setHiddenCampaigns([...hiddenCampaigns]);
+    }
+  };
 
   const handleTweetSubmit = async () => {
     const links = tweetLink.split(/\s/).filter((l) => !!l);
@@ -181,6 +197,10 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
       campaign.submittedTweets?.filter(({ authorId }) => authorId === user.id),
     [campaign]
   );
+
+  if (!showHidden && isHidden) {
+    return null;
+  }
 
   let tweetString = '';
 
@@ -328,7 +348,6 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                     </Hidden>
                   </>
                 )}
-
                 {campaign.users && !!campaign.users.length && (
                   <>
                     <Hidden xsDown>
@@ -364,6 +383,8 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 </Hidden>
                 <CampaignMenu
                   campaign={campaign}
+                  isHidden={isHidden}
+                  onHideCampaign={handleToggleHideCampaign}
                   onSubmitTweet={() => setSubmitTweet(true)}
                   onEditCampaign={
                     setEditCampaign && (() => setEditCampaign(campaign))

@@ -6,7 +6,7 @@ export type MenuWithTriggerProps = Omit<MenuProps, 'open'> & {
   id: string;
   trigger?: ReactNode;
   triggerClassName?: string;
-  children: ReactNode[];
+  children: ReactNode | ReactNode[];
 };
 
 export type MenuWithTriggerType = React.FC<MenuWithTriggerProps> & {

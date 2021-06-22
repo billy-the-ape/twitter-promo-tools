@@ -11,22 +11,28 @@ import {
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import TwitterIcon from '@material-ui/icons/Twitter';
+import HideIcon from '@material-ui/icons/VisibilityOff';
+import ShowIcon from '@material-ui/icons/Visibility';
 import { useTranslation } from 'react-i18next';
 
 import Menu from './MenuWithTrigger';
 
 export type CampaignMenuProps = {
   campaign: Campaign;
+  isHidden: boolean;
   onSubmitTweet?: () => void;
   onEditCampaign?: () => void;
   onDeleteCampaign?: () => void;
+  onHideCampaign?: () => void;
 };
 
 const CampaignMenu: React.FC<CampaignMenuProps> = ({
   campaign,
+  isHidden,
   onSubmitTweet,
   onEditCampaign,
   onDeleteCampaign,
+  onHideCampaign,
 }) => {
   const { t } = useTranslation();
   const isSm = useIsMobile({ breakpoint: 'sm' });
@@ -36,6 +42,8 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
     manager: isManager = false,
     owner: isOwner = false,
   } = campaign.permissions ?? {};
+
+  const hideString: string = isHidden ? t('unhide_campaign') : t('hide_campaign');
 
   return isSm ? (
     <Menu id={`menu-${campaign._id}`}>
@@ -63,6 +71,14 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           <Typography variant="inherit">{t('delete')}</Typography>
         </Menu.Item>
       )}
+      {onHideCampaign && (
+        <Menu.Item onClick={stopPropagationCallback(onHideCampaign)}>
+          <ListItemIcon>
+            {isHidden ? <ShowIcon fontSize="small" /> : <HideIcon fontSize="small" />}
+          </ListItemIcon>
+          <Typography variant="inherit">{hideString}</Typography>
+        </Menu.Item>
+      )}
     </Menu>
   ) : (
     <Box display="flex">
@@ -86,6 +102,13 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
+      )}
+      {onHideCampaign && (
+        <Tooltip title={hideString}>
+        <IconButton onClick={stopPropagationCallback(onHideCampaign)}>
+            {isHidden ? <ShowIcon fontSize="small" /> : <HideIcon fontSize="small" />}
+        </IconButton>
+      </Tooltip>
       )}
     </Box>
   );

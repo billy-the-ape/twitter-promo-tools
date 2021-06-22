@@ -1,4 +1,5 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useSharedState } from '@/hooks/useSharedState';
 import { ValidSort } from '@/mongo/campaignSorts';
 import { Campaign } from '@/types';
 import { fetchJson } from '@/util';
@@ -11,10 +12,12 @@ import {
   Tooltip,
   debounce,
   makeStyles,
+  IconButton,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
+import SettingsIcon from '@material-ui/icons/Settings';
 import SortIcon from '@material-ui/icons/Sort';
 import { TFunction } from 'next-i18next';
 import dynamic from 'next/dynamic';
@@ -66,11 +69,14 @@ const getSortOptions = (t: TFunction) =>
     [t]
   );
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ breakpoints, spacing }) => ({
   item: {
     maxWidth: '100%',
     display: 'flex',
     flexDirection: 'column',
+    '&:empty': {
+      padding: 0
+    }
   },
   searchField: {
     maxWidth: '200px',
@@ -79,8 +85,10 @@ const useStyles = makeStyles(({ spacing }) => ({
     pointerEvents: 'none',
     cursor: 'pointer',
   },
-  sortIcon: {
-    margin: spacing(0, 2),
+  icons: {
+    [breakpoints.up('sm')]: {
+      margin: spacing(0, 2),
+    }
   },
 }));
 
@@ -93,6 +101,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const [isDialogLoading, setIsDialogLoading] = useState(false);
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
   const [deleteRecord, setDeleteCampaign] = useState<Campaign | null>(null);
+  const [showHidden, setShowHidden] = useSharedState('showHidden');
   const [sortValue, setSortValue] = useState<ValidSort>('urgency');
   const [debouncedSearchValue, setDebouncedSearchValue] = useState('');
   const debouncedSetSearchValue = useCallback(
@@ -201,21 +210,31 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
                 ),
               }}
             />
-            <Menu
-              id="campaign-sort"
-              triggerClassName={classes.sortIcon}
-              trigger={
+            <Box display="flex" className={classes.icons}>
+              <Menu
+                id="campaign-sort"
+                trigger={
+                  <Tooltip title={t('sort_campaigns') as string}>
+                    <SortIcon />
+                  </Tooltip>
+                }
+              >
+                {sortOptions.map(({ text, value }) => (
+                  <Menu.Item key={value} onClick={() => setSortValue(value)}>
+                    {text}
+                  </Menu.Item>
+                ))}
+              </Menu>
+              <Menu id="campaign-settings" trigger={
                 <Tooltip title={t('sort_campaigns') as string}>
-                  <SortIcon />
+                  <SettingsIcon />
                 </Tooltip>
-              }
-            >
-              {sortOptions.map(({ text, value }) => (
-                <Menu.Item key={value} onClick={() => setSortValue(value)}>
-                  {text}
+              }>
+                <Menu.Item onClick={() => setShowHidden(!showHidden)}>
+                  {showHidden ? t('hide_hidden_campaigns') : t('show_hidden_campaigns')}
                 </Menu.Item>
-              ))}
-            </Menu>
+              </Menu>
+            </Box>
             <Button
               variant="contained"
               color="primary"
