@@ -103,11 +103,12 @@ export const getCampaigns = async (
   if (searchText?.trim() ?? '' !== '') {
     agg.unshift({
       $search: {
-        index: 'campaignSearch',
-        text: {
-          query: searchText.trim(),
-          path: {
-            wildcard: '*',
+        "autocomplete": {
+          "query": searchText.trim(),
+          "path": "name",
+          "fuzzy": {
+            "maxEdits": 2,
+            "prefixLength": 3
           },
         },
       },
