@@ -20,7 +20,7 @@ const CsvButton: React.FC<CsvButtonProps> = ({
 
   let data: any;
 
-  if (users.length > 1) {
+  /* if (users.length > 1) {
     fields.push('Influencer');
     let maxTweetsByUser = 0;
     data = [...users]
@@ -49,19 +49,22 @@ const CsvButton: React.FC<CsvButtonProps> = ({
     for (let i = 0; i < maxTweetsByUser; i++) {
       fields.push(`Tweet ${i + 1}`);
     }
-  } else if (users.length === 1) {
-    const influencer = `twitter.com/${users[0].screenName}`;
-    fields.push('Tweet', 'Date');
-    data = submittedTweets
-      .sort(({ createdAt: a }, { createdAt: b }) => a.valueOf() - b.valueOf())
-      .reduce<Record<string, string>[]>((acc, { id, createdAt }) => {
-        acc.push({
-          Tweet: `${influencer}/status/${id}`,
-          Date: formatDate(createdAt),
-        });
-        return acc;
-      }, []);
-  }
+  } else if (users.length === 1) { */
+  fields.push('Influencer', 'Date', 'Tweet');
+  data = submittedTweets
+    .sort(({ createdAt: a }, { createdAt: b }) => a.valueOf() - b.valueOf())
+    .reduce<Record<string, string>[]>((acc, { id, createdAt, authorId }) => {
+      const user = users.find(({ id }) => id === authorId)!;
+      if (!user) return acc;
+      const influencer = `twitter.com/${user.screenName}`;
+      acc.push({
+        Influencer: influencer,
+        Tweet: `${influencer}/status/${id}`,
+        Date: formatDate(createdAt),
+      });
+      return acc;
+    }, []);
+  /* } */
 
   if (!data || !data.length) return null;
   const csv = parse(data, { fields });
