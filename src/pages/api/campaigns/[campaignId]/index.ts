@@ -3,6 +3,7 @@ import {
   deleteCampaigns,
   getCampaigns,
 } from '@/mongo/campaigns';
+import { disconnect } from '@/mongo/util';
 import { Session, SubmittedTweet } from '@/types';
 import { fetchTwitterApi } from '@/util';
 import { ObjectId } from 'mongodb';
@@ -42,6 +43,7 @@ const handler: NextApiHandler = async (req, res) => {
       if (!campaigns || !campaigns.length) {
         console.error('CAMPAIGN NOT FOUND');
         res.status(404).send({});
+        disconnect();
         return;
       }
       const [campaign] = campaigns;
@@ -54,6 +56,7 @@ const handler: NextApiHandler = async (req, res) => {
         })
       ) {
         res.status(400).send({});
+        disconnect();
         return;
       }
 
@@ -70,30 +73,17 @@ const handler: NextApiHandler = async (req, res) => {
         campaign,
         submittedTweets
       );
-      /* for (const {
-        id,
-        author_id: authorId,
-        created_at: createdAt,
-      } of tweetResult) {
-        const result = await addTweetToCampaign(
-          id,
-          campaign,
-          authorId,
-          session.user.id,
-          new Date(createdAt)
-        );
-
-        resultsArray.push(result);
-      } */
 
       const failResponse = resultsArray.find((code) => code !== 204);
 
       if (failResponse) {
         res.status(failResponse).send(resultsArray);
+        disconnect();
         return;
       }
 
       res.status(204).send({});
+      disconnect();
       return;
     }
     case 'DELETE': {
@@ -103,6 +93,7 @@ const handler: NextApiHandler = async (req, res) => {
       } else {
         res.status(403).send({});
       }
+      disconnect();
       return;
     }
     case 'GET': {
@@ -114,6 +105,7 @@ const handler: NextApiHandler = async (req, res) => {
         true
       );
       res.status(200).json(campaigns);
+      disconnect();
     }
   }
 };

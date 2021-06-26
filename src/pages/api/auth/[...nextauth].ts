@@ -1,3 +1,4 @@
+import { disconnect } from '@/mongo/util';
 import { User } from '@/types';
 import { seenUser, upsertUser } from 'mongo/users';
 import NextAuth from 'next-auth';
@@ -92,6 +93,8 @@ export default NextAuth({
 
       upsertUser(u);
 
+      disconnect();
+
       return true;
     },
     // async redirect(url, baseUrl) { return baseUrl },
@@ -105,6 +108,8 @@ export default NextAuth({
       };
 
       seenUser(s.user.id);
+
+      disconnect();
 
       return s;
     },

@@ -28,6 +28,13 @@ let cacheCreationTime = 0;
 // Close connection every 5 minutes
 const CACHE_LIMIT = 60000 * 5;
 
+export const disconnect = () => {
+  if (cachedClient) {
+    cachedClient.close();
+    cachedDb = null;
+  }
+};
+
 export const connectToDatabase = async (): Promise<Db> => {
   const uri = process.env.MONGODB_URI!;
   // If the database connection is cached,
@@ -35,9 +42,7 @@ export const connectToDatabase = async (): Promise<Db> => {
   const now = Date.now();
 
   if (cachedClient && cacheCreationTime < now - CACHE_LIMIT) {
-    console.log('CLOSING CONNECTION');
-    cachedClient.close();
-    cachedDb = null;
+    disconnect();
   } else if (cachedDb) {
     console.log('USING CACHED DB');
     return cachedDb;

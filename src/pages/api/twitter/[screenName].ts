@@ -1,6 +1,7 @@
 import { getUsers, upsertUser } from '@/mongo/users';
+import { disconnect } from '@/mongo/util';
 import { TwitterUser, User } from '@/types';
-import { fetchJson, fetchTwitterApi } from '@/util';
+import { fetchTwitterApi } from '@/util';
 import { mapTwitterToUsers } from '@/util';
 import type { NextApiHandler } from 'next';
 
@@ -27,6 +28,7 @@ const handler: NextApiHandler<User[]> = async (req, res) => {
   newUsers.forEach(upsertUser);
 
   const result = [...users, ...newUsers];
+  disconnect();
 
   return res.status(200).json(result);
 };
