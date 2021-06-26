@@ -92,9 +92,6 @@ export default NextAuth({
       } as User;
 
       upsertUser(u);
-
-      disconnect();
-
       return true;
     },
     // async redirect(url, baseUrl) { return baseUrl },
@@ -108,9 +105,6 @@ export default NextAuth({
       };
 
       seenUser(s.user.id);
-
-      disconnect();
-
       return s;
     },
     // async jwt(token, user, account, profile, isNewUser) { return token }
