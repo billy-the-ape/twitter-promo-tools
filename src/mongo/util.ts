@@ -54,6 +54,9 @@ export const connectToDatabase = async (): Promise<Db> => {
   cachedClient = await MongoClient.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    maxIdleTimeMS: 10000,
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 20000,
   });
   // Select the database through the connection,
   // using the database path of the connection string
