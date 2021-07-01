@@ -1,6 +1,5 @@
 import { getCampaignsForUser, upsertCampaign } from '@/mongo/campaigns';
 import { ValidSort } from '@/mongo/campaignSorts';
-import { disconnect } from '@/mongo/util';
 import { Campaign, Session } from '@/types';
 import type { NextApiHandler } from 'next';
 import { getSession } from 'next-auth/client';
@@ -33,7 +32,6 @@ const handler: NextApiHandler = async (req, res) => {
             realPage
           )
         );
-        disconnect();
         return;
       case 'POST':
         const campaign = JSON.parse(body) as Campaign;
@@ -41,12 +39,10 @@ const handler: NextApiHandler = async (req, res) => {
 
         if (!result) {
           res.status(403).send({});
-          disconnect();
           return;
         }
 
         res.status(!campaign._id ? 201 : 200).json(result);
-        disconnect();
         return;
     }
   } catch (e) {

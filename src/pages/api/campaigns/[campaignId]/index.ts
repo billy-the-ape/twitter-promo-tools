@@ -3,7 +3,6 @@ import {
   deleteCampaigns,
   getCampaigns,
 } from '@/mongo/campaigns';
-import { disconnect } from '@/mongo/util';
 import { Session, SubmittedTweet } from '@/types';
 import { fetchTwitterApi } from '@/util';
 import { ObjectId } from 'mongodb';
@@ -43,7 +42,6 @@ const handler: NextApiHandler = async (req, res) => {
       if (!campaigns || !campaigns.length) {
         console.error('CAMPAIGN NOT FOUND');
         res.status(404).send({});
-        disconnect();
         return;
       }
       const [campaign] = campaigns;
@@ -56,7 +54,6 @@ const handler: NextApiHandler = async (req, res) => {
         })
       ) {
         res.status(400).send({});
-        disconnect();
         return;
       }
 
@@ -78,12 +75,10 @@ const handler: NextApiHandler = async (req, res) => {
 
       if (failResponse) {
         res.status(failResponse).send(resultsArray);
-        disconnect();
         return;
       }
 
       res.status(204).send({});
-      disconnect();
       return;
     }
     case 'DELETE': {
@@ -93,7 +88,6 @@ const handler: NextApiHandler = async (req, res) => {
       } else {
         res.status(403).send({});
       }
-      disconnect();
       return;
     }
     case 'GET': {
@@ -105,7 +99,6 @@ const handler: NextApiHandler = async (req, res) => {
         true
       );
       res.status(200).json(campaigns);
-      disconnect();
     }
   }
 };

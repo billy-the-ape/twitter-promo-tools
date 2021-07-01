@@ -1,4 +1,3 @@
-import { disconnect } from '@/mongo/util';
 import { User } from '@/types';
 import { seenUser, upsertUser } from 'mongo/users';
 import NextAuth from 'next-auth';

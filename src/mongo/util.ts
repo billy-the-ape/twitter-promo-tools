@@ -1,6 +1,17 @@
 import { Campaign, CampaignPermissions, CollectionTypeMap } from '@/types';
-import { Db, MongoClient } from 'mongodb';
-import { Collection } from 'mongodb';
+import { Collection, Db, MongoClient } from 'mongodb';
+
+type ConnType = {
+  client: MongoClient;
+  db: Db;
+};
+
+type CachedType = {
+  conn: ConnType | null;
+  promise: Promise<ConnType> | null;
+};
+
+const MONGODB_URI = process.env.MONGODB_URI;
 
 export const getUserCampaignPermissions = (
   userId: string,
@@ -21,56 +32,51 @@ export const getUserCampaignPermissions = (
     influencer,
   };
 };
-// Create cached connection variable
-let cachedClient: MongoClient;
-let cachedDb: Db | null;
-let cacheCreationTime = 0;
-// Close connection every 5 minutes
-const CACHE_LIMIT = 60000 * 5;
 
-export const disconnect = () => {
-  if (cachedClient) {
-    cachedClient.close();
-    cachedDb = null;
+/**
+ * Global is used here to maintain a cached connection across hot reloads
+ * in development. This prevents connections growing exponentially
+ * during API Route usage.
+ */
+let cached = (global as any).mongo as CachedType;
+
+if (!cached) {
+  cached = (global as any).mongo = { conn: null, promise: null };
+}
+
+export async function connectToDatabase() {
+  if (!MONGODB_URI) {
+    throw new Error(
+      'Please define the MONGODB_URI environment variable inside .env.local'
+    );
   }
-};
-
-export const connectToDatabase = async (): Promise<Db> => {
-  const uri = process.env.MONGODB_URI!;
-  // If the database connection is cached,
-  // use it instead of creating a new connection
-  const now = Date.now();
-
-  if (cachedClient && cacheCreationTime < now - CACHE_LIMIT) {
-    disconnect();
-  } else if (cachedDb) {
-    console.log('USING CACHED DB');
-    return cachedDb;
+  if (cached.conn) {
+    return cached.conn;
   }
 
-  cacheCreationTime = now;
-
-  // If no connection is cached, create a new one
-  cachedClient = await MongoClient.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    maxIdleTimeMS: 10000,
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 20000,
-  });
-  // Select the database through the connection,
-  // using the database path of the connection string
-  const dbName = new URL(uri).pathname.substr(1);
-  const db = cachedClient.db(dbName);
-
-  // Cache the database connection and return the connection
-  cachedDb = db;
-  return db;
-};
+  if (!cached.promise) {
+    const opts = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      maxIdleTimeMS: 10000,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 20000,
+    };
+    const dbName = new URL(process.env.MONGODB_URI!).pathname.substr(1);
+    cached.promise = MongoClient.connect(MONGODB_URI, opts).then((client) => {
+      return {
+        client,
+        db: client.db(dbName),
+      };
+    });
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
 
 export const getCollection = async <TKey extends keyof CollectionTypeMap>(
   key: TKey
 ) => {
-  const db = await connectToDatabase();
+  const db = (await connectToDatabase()).db;
   return db.collection(key) as Collection<CollectionTypeMap[TKey]>;
 };

@@ -1,5 +1,4 @@
 import { deleteTweet, getCampaigns } from '@/mongo/campaigns';
-import { disconnect } from '@/mongo/util';
 import { Session } from '@/types';
 import { ObjectId } from 'mongodb';
 import { NextApiHandler } from 'next';
@@ -22,7 +21,6 @@ const handler: NextApiHandler = async (req, res) => {
       );
       if (!campaigns || !campaigns.length) {
         res.status(404).send({});
-        disconnect();
         return;
       }
       const statusCode = await deleteTweet(
@@ -31,7 +29,6 @@ const handler: NextApiHandler = async (req, res) => {
         campaigns[0]
       );
       res.status(statusCode).send({});
-      disconnect();
       break;
   }
 };
