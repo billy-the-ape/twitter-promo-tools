@@ -12,7 +12,9 @@ import {
   Typography,
   makeStyles,
 } from '@material-ui/core';
+import { fade } from '@material-ui/core/styles/colorManipulator';
 import { AvatarGroup } from '@material-ui/lab';
+import clsx from 'clsx';
 import { useSession } from 'next-auth/client';
 import { useSnackbar } from 'notistack';
 import { useMemo, useState } from 'react';
@@ -34,7 +36,7 @@ export type CampaignDetailsProps = {
   tweetString?: string;
 };
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ spacing, palette }) => ({
   markDown: {
     margin: 0,
     lineHeight: spacing(2) + 'px',
@@ -53,6 +55,23 @@ const useStyles = makeStyles(({ spacing }) => ({
   avatars: {
     justifyContent: 'center',
     cursor: 'pointer',
+  },
+  fadeBottom: {
+    position: 'relative',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      zIndex: '1',
+      bottom: '0',
+      left: '0',
+      pointerEvents: 'none',
+      backgroundImage: `linear-gradient(to bottom, ${fade(
+        palette.background.default,
+        0
+      )}, ${fade(palette.background.default, 1)} 90%)`,
+      width: '100%',
+      height: '5em',
+    },
   },
 }));
 
@@ -235,20 +254,22 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
       <Divider />
       {campaign.description && (
         <>
-          <Collapse in={expandDescription} collapsedHeight={100}>
-            <div>
-              {campaign.description.split('\n').map((desc, i) => (
-                <ReactMarkdown
-                  remarkPlugins={[gfm]}
-                  className={classes.markDown}
-                  key={i}
-                  linkTarget="_blank"
-                >
-                  {desc}
-                </ReactMarkdown>
-              ))}
-            </div>
-          </Collapse>
+          <div className={clsx(!expandDescription && classes.fadeBottom)}>
+            <Collapse in={expandDescription} collapsedHeight={100}>
+              <div>
+                {campaign.description.split('\n').map((desc, i) => (
+                  <ReactMarkdown
+                    remarkPlugins={[gfm]}
+                    className={classes.markDown}
+                    key={i}
+                    linkTarget="_blank"
+                  >
+                    {desc}
+                  </ReactMarkdown>
+                ))}
+              </div>
+            </Collapse>
+          </div>
           <Button onClick={() => setExpandDescription(!expandDescription)}>
             {expandDescription
               ? t('collapse_description')
