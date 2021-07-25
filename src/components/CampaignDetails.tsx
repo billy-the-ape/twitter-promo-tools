@@ -25,6 +25,7 @@ import CsvButton from './CsvButton';
 import TweetList from './TweetList';
 import UserChip from './UserChip';
 import UserChipGrid from './UserChipGrid';
+import { deleteTweetFromCampaign } from './util/fetch';
 
 export type CampaignDetailsProps = {
   campaign: Campaign;
@@ -85,14 +86,12 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   );
 
   const handleTweetDelete = async (tweetId: string) => {
-    const { status } = await fetch(
-      `/api/campaigns/${campaign._id}/${tweetId}`,
-      {
-        method: 'DELETE',
-      }
+    const success = await deleteTweetFromCampaign(
+      String(campaign._id),
+      tweetId
     );
 
-    if (status === 204) {
+    if (success) {
       enqueueSnackbar(t('tweet_deleted'), { variant: 'success' });
       mutate();
     } else {

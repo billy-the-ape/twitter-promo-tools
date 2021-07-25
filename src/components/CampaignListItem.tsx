@@ -36,6 +36,11 @@ import GaugeChart from 'react-gauge-chart';
 import { useTranslation } from 'react-i18next';
 
 import CampaignMenu from './CampaignMenu';
+import {
+  patchHideCampaigns,
+  patchUnhideCampaigns,
+  submitTweetsToCampaign,
+} from './util/fetch';
 
 const CampaignDetails = dynamic(() => import('./CampaignDetails'), {
   ssr: false,
@@ -136,19 +141,17 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
   const completed =
     campaign.tweetCount &&
     campaign.tweetCount <= (campaign.userTweets?.length ?? 0);
-  const [hiddenCampaigns, setHiddenCampaigns] = useSharedState('hiddenCampaigns');
   const [showHidden] = useSharedState('showHidden');
 
   const campaignId = String(campaign._id);
-  const isHidden = hiddenCampaigns.includes(campaignId);
 
-  const handleToggleHideCampaign = () => {
-    const idx = hiddenCampaigns.indexOf(campaignId);
-    if (idx === -1) {
-      setHiddenCampaigns([...hiddenCampaigns, campaignId]);
+  const handleToggleHideCampaign = async () => {
+    if (!campaign.hidden) {
+      await patchHideCampaigns([campaignId]);
+      mutate();
     } else {
-      hiddenCampaigns.splice(idx, 1);
-      setHiddenCampaigns([...hiddenCampaigns]);
+      await patchUnhideCampaigns([campaignId]);
+      mutate();
     }
   };
 
@@ -167,10 +170,8 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
       ids.push(id);
     }
 
-    const { status } = await fetch(`/api/campaigns/${campaign._id}`, {
-      method: 'POST',
-      body: JSON.stringify(ids),
-    });
+    const status = await submitTweetsToCampaign(String(campaign._id), ids);
+
     switch (status) {
       case 204:
         enqueueSnackbar(t('tweet_submitted'), { variant: 'success' });
@@ -198,7 +199,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
     [campaign]
   );
 
-  if (!showHidden && isHidden) {
+  if (!showHidden && campaign.hidden) {
     return null;
   }
 
@@ -241,7 +242,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
           )
         }
       >
-        {completed && !isExpanded && (
+        {(completed || campaign.hidden) && !isExpanded && (
           <div className={classes.completedOverlay}>&nbsp;</div>
         )}
         <Box
@@ -383,7 +384,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 </Hidden>
                 <CampaignMenu
                   campaign={campaign}
-                  isHidden={isHidden}
+                  isHidden={!!campaign.hidden}
                   onHideCampaign={handleToggleHideCampaign}
                   onSubmitTweet={() => setSubmitTweet(true)}
                   onEditCampaign={

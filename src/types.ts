@@ -54,6 +54,7 @@ export type Campaign = {
   permissions?: CampaignPermissions;
   tweetPercentage?: number;
   datePercentage?: number;
+  hidden?: boolean;
 
   userTweets: SubmittedTweet[];
   submittedTweets?: SubmittedTweet[];

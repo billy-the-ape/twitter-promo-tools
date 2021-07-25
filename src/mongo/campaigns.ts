@@ -60,7 +60,12 @@ export const upsertCampaign = async (userId: string, campaign: Campaign) => {
 };
 
 export const deleteCampaigns = async (userId: string, ids: ObjectId[]) => {
-  const campaigns = await getCampaigns(userId, { _id: { $in: ids } }, false);
+  const campaigns = await getCampaigns(
+    userId,
+    { _id: { $in: ids } },
+    false,
+    true
+  );
   const userOwnsAll = !campaigns.filter(({ creator }) => creator !== userId)
     .length;
   if (!userOwnsAll) {
@@ -71,10 +76,29 @@ export const deleteCampaigns = async (userId: string, ids: ObjectId[]) => {
   return true;
 };
 
+export const hideCampaigns = async (userId: string, ids: ObjectId[]) => {
+  const collection = await getCollection('campaigns');
+
+  collection.updateMany(
+    { _id: { $in: ids } },
+    { $addToSet: { hiddenFor: userId } }
+  );
+};
+
+export const unHideCampaigns = async (userId: string, ids: ObjectId[]) => {
+  const collection = await getCollection('campaigns');
+
+  collection.updateMany(
+    { _id: { $in: ids } },
+    { $pull: { hiddenFor: userId } }
+  );
+};
+
 export const getCampaigns = async (
   userId: string,
   query: FilterQuery<Campaign>,
   userOnly: boolean,
+  showHidden: boolean = false,
   searchText: string = '',
   aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {},
   sort?: keyof typeof sortMap,
@@ -96,9 +120,25 @@ export const getCampaigns = async (
             cond: { $eq: ['$$tweet.authorId', userId] },
           },
         },
+        hidden: {
+          $eq: [
+            {
+              $size: {
+                $ifNull: [{ $setIntersection: ['$hiddenFor', [userId]] }, []],
+              },
+            },
+            1,
+          ],
+        },
       },
     },
   ];
+
+  if (!showHidden) {
+    agg.push({
+      $match: { hidden: false },
+    });
+  }
 
   if (searchText?.trim() ?? '' !== '') {
     agg.unshift({
@@ -174,6 +214,7 @@ export const getCampaigns = async (
 
 export const getCampaignsForUser = async (
   userId: string,
+  showHidden: boolean = false,
   searchText?: string,
   aggregationOptions: Partial<Record<CampaignAggregationOption, boolean>> = {},
   sort?: ValidSort,
@@ -189,6 +230,7 @@ export const getCampaignsForUser = async (
         { influencers: { $elemMatch: { id: userId } } },
       ],
     },
+    showHidden,
     true,
     searchText,
     aggregationOptions,

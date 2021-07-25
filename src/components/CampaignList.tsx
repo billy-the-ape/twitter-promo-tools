@@ -12,7 +12,6 @@ import {
   Tooltip,
   debounce,
   makeStyles,
-  IconButton,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -36,6 +35,7 @@ import { useSWRInfinite } from 'swr';
 import CampaignListItem from './CampaignListItem';
 import Menu from './MenuWithTrigger';
 import Section from './Section';
+import { deleteCampaigns, postUpsertCampaign } from './util/fetch';
 
 const CampaignDialog = dynamic(() => import('./CampaignDialog'), {
   ssr: false,
@@ -75,8 +75,8 @@ const useStyles = makeStyles(({ breakpoints, spacing }) => ({
     display: 'flex',
     flexDirection: 'column',
     '&:empty': {
-      padding: 0
-    }
+      padding: 0,
+    },
   },
   searchField: {
     maxWidth: '200px',
@@ -88,7 +88,7 @@ const useStyles = makeStyles(({ breakpoints, spacing }) => ({
   icons: {
     [breakpoints.up('sm')]: {
       margin: spacing(0, 2),
-    }
+    },
   },
 }));
 
@@ -115,9 +115,9 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const getSWRKey = useCallback(
     (page: number, previousPageData: Campaign[] | null) => {
       if (previousPageData && !previousPageData.length) return null;
-      return `/api/campaigns?search=${debouncedSearchValue}&sort=${sortValue}&page=${page}`;
+      return `/api/campaigns?search=${debouncedSearchValue}&sort=${sortValue}&showHidden=${showHidden}&page=${page}`;
     },
-    [debouncedSearchValue, sortValue]
+    [debouncedSearchValue, sortValue, showHidden]
   );
 
   const { data, revalidate, mutate, size, setSize } = useSWRInfinite<
@@ -143,10 +143,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
       })),
     };
 
-    const { ok, status } = await fetch('/api/campaigns', {
-      method: 'POST',
-      body: JSON.stringify(saveCampaign),
-    });
+    const { ok, status } = await postUpsertCampaign(saveCampaign);
 
     if (ok) {
       setShowNewDialog(false);
@@ -169,10 +166,9 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
     }
     setIsDialogLoading(true);
 
-    const { ok } = await fetch(`/api/campaigns/${String(deleteRecord._id)}`, {
-      method: 'DELETE',
-    });
-    if (ok) {
+    const success = await deleteCampaigns([String(deleteRecord._id)]);
+
+    if (success) {
       setDeleteCampaign(null);
       enqueueSnackbar(t('campaign_deleted'), { variant: 'success' });
       // Fetch updated campaigns
@@ -225,13 +221,23 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
                   </Menu.Item>
                 ))}
               </Menu>
-              <Menu id="campaign-settings" trigger={
-                <Tooltip title={t('sort_campaigns') as string}>
-                  <SettingsIcon />
-                </Tooltip>
-              }>
-                <Menu.Item onClick={() => setShowHidden(!showHidden)}>
-                  {showHidden ? t('hide_hidden_campaigns') : t('show_hidden_campaigns')}
+              <Menu
+                id="campaign-settings"
+                trigger={
+                  <Tooltip title={t('sort_campaigns') as string}>
+                    <SettingsIcon />
+                  </Tooltip>
+                }
+              >
+                <Menu.Item
+                  onClick={() => {
+                    setShowHidden(!showHidden);
+                    mutate();
+                  }}
+                >
+                  {showHidden
+                    ? t('hide_hidden_campaigns')
+                    : t('show_hidden_campaigns')}
                 </Menu.Item>
               </Menu>
             </Box>

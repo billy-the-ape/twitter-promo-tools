@@ -17,7 +17,8 @@ const handler: NextApiHandler = async (req, res) => {
         {
           _id: new ObjectId(campaignId),
         },
-        false
+        false,
+        true
       );
       if (!campaigns || !campaigns.length) {
         res.status(404).send({});

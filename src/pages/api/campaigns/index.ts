@@ -11,7 +11,7 @@ const handler: NextApiHandler = async (req, res) => {
     const {
       body,
       method,
-      query: { search, sort, page },
+      query: { search, sort, page, showHidden },
     } = req;
 
     switch (method) {
@@ -20,9 +20,11 @@ const handler: NextApiHandler = async (req, res) => {
           !!sort && !Array.isArray(sort) ? sort : 'urgency'
         ) as ValidSort;
         const realPage = !!page && !Array.isArray(page) ? Number(page) : 0;
+
         res.status(200).json(
           await getCampaignsForUser(
             session.user.id,
+            showHidden === 'true',
             typeof search === 'string' && search !== '' ? search : undefined,
             {
               fullUsers: true,
