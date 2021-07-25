@@ -92,7 +92,7 @@ export const completionPercentage: object[] = [
           if: {
             $or: [
               { $eq: ['$datePercentage', 0] },
-              { $eq: ['$tweetPercentage', 1] },
+              { $gte: ['$tweetPercentage', 1] },
             ],
           },
           then: 0,
