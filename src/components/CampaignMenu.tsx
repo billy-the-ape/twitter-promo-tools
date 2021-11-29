@@ -7,9 +7,11 @@ import {
   ListItemIcon,
   Tooltip,
   Typography,
+  makeStyles,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import TwitterIcon from '@material-ui/icons/Twitter';
 import ShowIcon from '@material-ui/icons/Visibility';
 import HideIcon from '@material-ui/icons/VisibilityOff';
@@ -17,6 +19,12 @@ import { useTranslation } from 'react-i18next';
 
 import Menu from './MenuWithTrigger';
 import { patchHideCampaigns, patchUnhideCampaigns } from './util/fetch';
+
+const useStyles = makeStyles(({ palette }) => ({
+  forceRegularColor: {
+    color: `${palette.text.primary} !important`,
+  },
+}));
 
 export type CampaignMenuProps = {
   campaign: Campaign;
@@ -37,6 +45,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
 }) => {
   const { t } = useTranslation();
   const isSm = useIsMobile({ breakpoint: 'sm' });
+  const classes = useStyles();
 
   const handleToggleHideCampaign = async () => {
     if (!campaign.hidden) {
@@ -60,6 +69,18 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
 
   return isSm && !showMobileIcons ? (
     <Menu id={`menu-${campaign._id}`}>
+      {campaign.externalLink && (
+        <Menu.Item
+          onClick={stopPropagationCallback(() =>
+            window.open(campaign.externalLink)
+          )}
+        >
+          <ListItemIcon>
+            <OpenInNewIcon fontSize="small" />
+          </ListItemIcon>
+          <Typography variant="inherit">{t('open_external_link')}</Typography>
+        </Menu.Item>
+      )}
       {onSubmitTweet && isInfluencer && (
         <Menu.Item onClick={stopPropagationCallback(onSubmitTweet)}>
           <ListItemIcon>
@@ -97,24 +118,22 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
     </Menu>
   ) : (
     <Box display="flex">
+      {campaign.externalLink && (
+        <Tooltip title={campaign.externalLink}>
+          <IconButton
+            className={classes.forceRegularColor}
+            href={campaign.externalLink}
+            target="_blank"
+            onClick={stopPropagationCallback()}
+          >
+            <OpenInNewIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
       {onSubmitTweet && isInfluencer && (
         <Tooltip title={t('submit_tweet') as string}>
           <IconButton onClick={stopPropagationCallback(onSubmitTweet)}>
             <TwitterIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      {onEditCampaign && isManager && (
-        <Tooltip title={t('edit') as string}>
-          <IconButton onClick={stopPropagationCallback(onEditCampaign)}>
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      {onDeleteCampaign && isOwner && (
-        <Tooltip title={t('delete') as string}>
-          <IconButton onClick={stopPropagationCallback(onDeleteCampaign)}>
-            <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
@@ -127,6 +146,26 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           )}
         </IconButton>
       </Tooltip>
+      {(isManager || isOwner) && (
+        <Menu id={`menu-${campaign._id}`}>
+          {onEditCampaign && isManager && (
+            <Menu.Item onClick={stopPropagationCallback(onEditCampaign)}>
+              <ListItemIcon>
+                <EditIcon fontSize="small" />
+              </ListItemIcon>
+              <Typography variant="inherit">{t('edit')}</Typography>
+            </Menu.Item>
+          )}
+          {onDeleteCampaign && isOwner && (
+            <Menu.Item onClick={stopPropagationCallback(onDeleteCampaign)}>
+              <ListItemIcon>
+                <DeleteIcon fontSize="small" />
+              </ListItemIcon>
+              <Typography variant="inherit">{t('delete')}</Typography>
+            </Menu.Item>
+          )}
+        </Menu>
+      )}
     </Box>
   );
 };

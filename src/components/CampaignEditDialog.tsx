@@ -94,6 +94,14 @@ const CampaignEditDialog: React.FC<CampaignDialogProps> = ({
               }
             />
             <TextField
+              id="campaign-external-link"
+              label={t('external_link')}
+              value={newCampaign.externalLink ?? campaign?.externalLink}
+              onChange={({ target: { value } }) =>
+                handleChange({ externalLink: value })
+              }
+            />
+            <TextField
               multiline
               id="campaign-description"
               label={t('description')}

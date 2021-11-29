@@ -46,6 +46,7 @@ export type Campaign = {
   name: string;
   creator: string; // twitter id of creator
   dateAdded: Date;
+  externalLink?: string;
 
   influencers?: UserBase[];
   managers?: UserBase[];

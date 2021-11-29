@@ -205,8 +205,8 @@ export const debounce = (fn: Function, timeout: number): Function => {
 };
 
 export const stopPropagationCallback =
-  <TFn extends Function>(fn: TFn) =>
+  <TFn extends Function>(fn?: TFn) =>
   (e: { stopPropagation: Function }) => {
     e.stopPropagation();
-    return fn();
+    return fn ? fn() : undefined;
   };

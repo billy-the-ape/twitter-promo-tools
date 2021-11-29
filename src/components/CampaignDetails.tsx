@@ -1,19 +1,15 @@
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Campaign, SubmittedTweet } from '@/types';
-import { getFullUserData } from '@/util';
 import {
-  Avatar,
   Box,
   Button,
   Collapse,
   Divider,
-  Hidden,
   Paper,
   Typography,
   makeStyles,
 } from '@material-ui/core';
 import { fade } from '@material-ui/core/styles/colorManipulator';
-import { AvatarGroup } from '@material-ui/lab';
 import clsx from 'clsx';
 import { useSession } from 'next-auth/client';
 import { useSnackbar } from 'notistack';
@@ -24,6 +20,7 @@ import gfm from 'remark-gfm';
 
 import CampaignAvatars from './CampaignAvatars';
 import CampaignCompletion from './CampaignCompletion';
+import CampaignDescription from './CampaignDescription';
 import CsvButton from './CsvButton';
 import TweetList from './TweetList';
 import UserChip from './UserChip';
@@ -251,18 +248,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
         <>
           <div className={clsx(!expandDescription && classes.fadeBottom)}>
             <Collapse in={expandDescription} collapsedHeight={100}>
-              <div>
-                {campaign.description.split('\n').map((desc, i) => (
-                  <ReactMarkdown
-                    remarkPlugins={[gfm]}
-                    className={classes.markDown}
-                    key={i}
-                    linkTarget="_blank"
-                  >
-                    {desc}
-                  </ReactMarkdown>
-                ))}
-              </div>
+              <CampaignDescription description={campaign.description} />
             </Collapse>
           </div>
           <Button onClick={() => setExpandDescription(!expandDescription)}>

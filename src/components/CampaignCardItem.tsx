@@ -13,6 +13,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 
 import CampaignAvatars from './CampaignAvatars';
+import CampaignDescription from './CampaignDescription';
 import CampaignMenu from './CampaignMenu';
 import CampaignProgressGauge from './CampaignProgressGauge';
 import CampaignTweetInput from './CampaignTweetInput';
@@ -55,6 +56,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   cardActions: {
     display: 'flex',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
     padding: spacing(0, 2),
   },
   completedOverlay: {
@@ -73,6 +75,13 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     marginLeft: spacing(-1),
     marginRight: spacing(-1),
     minWidth: '100%',
+    textTransform: 'none',
+  },
+  description: {
+    maxHeight: '4.1em',
+    overflow: 'hidden',
+    textAlign: 'initial',
+    fontWeight: 'normal',
   },
 }));
 
@@ -104,21 +113,29 @@ const CampaignCardItem: React.FC<CampaignCardItemProps> = ({
           onClick={() => setShowDetails(true)}
           classes={{ label: classes.buttonLabel }}
         >
-          <Typography variant="h5">{campaign.name}</Typography>
-          <Typography component="div" variant="caption" noWrap>
+          <Typography variant="h5">
+            <b>{campaign.name}</b>
+          </Typography>
+          <Typography component="div" variant="subtitle1" noWrap>
             {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
           </Typography>
-          <Typography component="div" variant="caption">
-            {tweetString}
+          <Typography component="div" variant="body1">
+            <b>{tweetString}</b>
           </Typography>
+          {campaign.description && (
+            <div className={classes.description}>
+              <CampaignDescription description={campaign.description} />
+            </div>
+          )}
+          <CampaignAvatars
+            campaign={campaign}
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpandMembers(true);
+              setShowDetails(true);
+            }}
+          />
         </Button>
-        <CampaignAvatars
-          campaign={campaign}
-          onClick={() => {
-            setExpandMembers(true);
-            setShowDetails(true);
-          }}
-        />
         {submitTweet && (
           <CampaignTweetInput
             campaignId={String(campaign._id)}
