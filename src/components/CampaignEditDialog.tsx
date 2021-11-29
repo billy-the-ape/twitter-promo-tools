@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogProps,
   DialogTitle,
-  Paper,
   TextField,
   makeStyles,
 } from '@material-ui/core';
@@ -37,7 +36,7 @@ export type CampaignDialogProps = Omit<DialogProps, 'onClose'> & {
   onClose: () => void;
 };
 
-const CampaignDialog: React.FC<CampaignDialogProps> = ({
+const CampaignEditDialog: React.FC<CampaignDialogProps> = ({
   campaign,
   isLoading,
   onSave,
@@ -173,4 +172,4 @@ const CampaignDialog: React.FC<CampaignDialogProps> = ({
   );
 };
 
-export default CampaignDialog;
+export default CampaignEditDialog;

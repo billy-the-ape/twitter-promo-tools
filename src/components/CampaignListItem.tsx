@@ -1,46 +1,31 @@
 import { useIsInitialized } from '@/hooks/useIsInitialized';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useSharedState } from '@/hooks/useSharedState';
+import { useSubmitTweets } from '@/hooks/useSubmitTweets';
+import { useTweetString } from '@/hooks/useTweetString';
 import { Campaign } from '@/types';
-import {
-  calculatePercentOff,
-  formatDate,
-  formatDateSince,
-  getFullUserData,
-} from '@/util';
+import { formatDate } from '@/util';
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Avatar,
   Box,
-  Button,
   Divider,
   Hidden,
-  IconButton,
-  TextField,
   Theme,
   Tooltip,
   Typography,
   makeStyles,
 } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import CancelIcon from '@material-ui/icons/Cancel';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { AvatarGroup } from '@material-ui/lab';
-import { useSession } from 'next-auth/client';
 import dynamic from 'next/dynamic';
-import { useSnackbar } from 'notistack';
-import { useMemo, useState } from 'react';
-import GaugeChart from 'react-gauge-chart';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import CampaignAvatars from './CampaignAvatars';
 import CampaignMenu from './CampaignMenu';
-import {
-  patchHideCampaigns,
-  patchUnhideCampaigns,
-  submitTweetsToCampaign,
-} from './util/fetch';
+import CampaignProgressGauge from './CampaignProgressGauge';
+import CampaignTweetInput from './CampaignTweetInput';
 
 const CampaignDetails = dynamic(() => import('./CampaignDetails'), {
   ssr: false,
@@ -85,15 +70,6 @@ const useStyles = makeStyles<Theme, { isExpanded: boolean }>(
         width: '80%',
       },
     },
-    submitButton: {
-      height: '100%',
-      marginRight: '-14px',
-      zIndex: 1,
-      borderRadius: '4px',
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
-      padding: '7px 16px',
-    },
     circle: {
       position: 'relative',
       top: '6px',
@@ -104,10 +80,6 @@ const useStyles = makeStyles<Theme, { isExpanded: boolean }>(
       borderRadius: '50%',
       border: `1px solid ${palette.text.primary}`,
     },
-    /* gauge: {
-      height: spacing(3),
-      width: spacing(3),
-    }, */
   })
 );
 
@@ -118,24 +90,18 @@ export type CampaignListItemProps = {
   setDeleteCampaign?: (c: Campaign) => void;
 };
 
-const TWEET_LINK_REGEX =
-  /^(https?:\/\/)?(mobile\.)?twitter.com\/(\w){1,15}\/status\/(?<id>[0-9]+)/i;
-
 const CampaignListItem: React.FC<CampaignListItemProps> = ({
   campaign,
   mutate,
   setEditCampaign,
   setDeleteCampaign,
 }) => {
-  const [{ user }] = useSession() as any;
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [submitTweet, setSubmitTweet] = useState(false);
   const [isTweetLinkError, setIsTweetLinkError] = useState(false);
-  const [tweetLink, setTweetLink] = useState('');
   const [expandMembers, setExpandMembers] = useState(false);
   const isMobile = useIsMobile();
-  const { enqueueSnackbar } = useSnackbar();
   const classes = useStyles({ isExpanded });
   const hasDetailsExpanded = useIsInitialized(isExpanded);
   const completed =
@@ -143,86 +109,11 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
     campaign.tweetCount <= (campaign.userTweets?.length ?? 0);
   const [showHidden] = useSharedState('showHidden');
 
-  const campaignId = String(campaign._id);
-
-  const handleToggleHideCampaign = async () => {
-    if (!campaign.hidden) {
-      await patchHideCampaigns([campaignId]);
-      mutate();
-    } else {
-      await patchUnhideCampaigns([campaignId]);
-      mutate();
-    }
-  };
-
-  const handleTweetSubmit = async () => {
-    const links = tweetLink.split(/\s/).filter((l) => !!l);
-    const ids = [];
-    for (const link of links) {
-      const match = TWEET_LINK_REGEX.exec(link);
-      if (!match) {
-        setIsTweetLinkError(true);
-        continue;
-      }
-      setIsTweetLinkError(false);
-
-      const { id } = match.groups || {};
-      ids.push(id);
-    }
-
-    const status = await submitTweetsToCampaign(String(campaign._id), ids);
-
-    switch (status) {
-      case 204:
-        enqueueSnackbar(t('tweet_submitted'), { variant: 'success' });
-        setTweetLink('');
-        setSubmitTweet(false);
-        mutate();
-        break;
-      case 400:
-        enqueueSnackbar(t('tweet_wrong_user'), { variant: 'error' });
-        break;
-      case 409:
-        enqueueSnackbar(t('tweet_already_submitted'), { variant: 'error' });
-        break;
-      case 418:
-        enqueueSnackbar(t('user_not_influencer'), { variant: 'error' });
-        break;
-      default:
-        enqueueSnackbar(t('an_error_occurred'), { variant: 'error' });
-    }
-  };
-
-  const myTweets = useMemo(
-    () =>
-      campaign.submittedTweets?.filter(({ authorId }) => authorId === user.id),
-    [campaign]
-  );
-
   if (!showHidden && campaign.hidden) {
     return null;
   }
 
-  let tweetString = '';
-
-  if (myTweets && myTweets.length) {
-    if (campaign.tweetCount) {
-      tweetString = t('time_since_last_tweet_num', {
-        timeSince: formatDateSince(myTweets[0].createdAt),
-        count: myTweets.length,
-        num: campaign.tweetCount,
-      });
-    } else {
-      tweetString = t('time_since_last_tweet', {
-        timeSince: formatDateSince(myTweets[0].createdAt),
-        count: myTweets.length,
-      });
-    }
-  } else {
-    t('num_tweets', {
-      num: campaign.tweetCount,
-    });
-  }
+  const tweetString = useTweetString({ campaign });
 
   return (
     <Accordion
@@ -252,42 +143,12 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
           alignItems="center"
         >
           {submitTweet && (
-            <>
-              <Tooltip title={t('tweet_submit_explanation') as string}>
-                <TextField
-                  className={classes.submitText}
-                  label={t('submit_tweet_full')}
-                  autoFocus
-                  error={isTweetLinkError}
-                  variant="outlined"
-                  value={tweetLink}
-                  size="small"
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={({ target: { value } }) => setTweetLink(value)}
-                  InputProps={{
-                    endAdornment: (
-                      <Button
-                        className={classes.submitButton}
-                        variant="contained"
-                        color="primary"
-                        disabled={!tweetLink}
-                        onClick={handleTweetSubmit}
-                      >
-                        <AddIcon />
-                      </Button>
-                    ),
-                  }}
-                />
-              </Tooltip>
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSubmitTweet(false);
-                }}
-              >
-                <CancelIcon />
-              </IconButton>
-            </>
+            <CampaignTweetInput
+              className={classes.submitText}
+              campaignId={String(campaign._id)}
+              onCancel={() => setSubmitTweet(false)}
+              mutate={mutate}
+            />
           )}
           {!submitTweet && (
             <>
@@ -324,7 +185,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
               <Box display="flex" alignItems="center">
                 <Hidden xsDown>
                   {/* INFO ABOUT LAST TWEET */}
-                  {(!!campaign.tweetCount || !!myTweets?.length) && (
+                  {!!campaign.tweetCount && (
                     <Typography variant="caption" className={classes.spaced}>
                       {tweetString}
                     </Typography>
@@ -333,17 +194,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 {/* TWEET GAUGE */}
                 {campaign.permissions?.influencer && !!campaign.datePercentage && (
                   <>
-                    <Tooltip title={t('chart_explanation') as string}>
-                      <Box mb={-1} ml={-1.5}>
-                        <GaugeChart
-                          hideText
-                          id={`chart-${campaign._id}`}
-                          style={{ width: 80 }}
-                          className={classes.gauge}
-                          percent={calculatePercentOff(campaign)}
-                        />
-                      </Box>
-                    </Tooltip>
+                    <CampaignProgressGauge campaign={campaign} />
                     <Hidden smDown>
                       <Divider orientation="vertical" />
                     </Hidden>
@@ -352,29 +203,14 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 {campaign.users && !!campaign.users.length && (
                   <>
                     <Hidden xsDown>
-                      <Tooltip title={t('expand_members') as string}>
-                        <AvatarGroup
-                          spacing="small"
-                          max={5}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsExpanded(true);
-                            setExpandMembers(!expandMembers);
-                          }}
-                        >
-                          {campaign.users.map((u) => {
-                            const { screenName, image } =
-                              getFullUserData(u, campaign.users!) ?? {};
-                            return (
-                              <Avatar key={screenName} src={image!}>
-                                {screenName
-                                  ?.substring(0, 1)
-                                  .toLocaleUpperCase()}
-                              </Avatar>
-                            );
-                          })}
-                        </AvatarGroup>
-                      </Tooltip>
+                      <CampaignAvatars
+                        campaign={campaign}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsExpanded(true);
+                          setExpandMembers(!expandMembers);
+                        }}
+                      />
                     </Hidden>
                   </>
                 )}
@@ -384,8 +220,7 @@ const CampaignListItem: React.FC<CampaignListItemProps> = ({
                 </Hidden>
                 <CampaignMenu
                   campaign={campaign}
-                  isHidden={!!campaign.hidden}
-                  onHideCampaign={handleToggleHideCampaign}
+                  mutate={mutate}
                   onSubmitTweet={() => setSubmitTweet(true)}
                   onEditCampaign={
                     setEditCampaign && (() => setEditCampaign(campaign))

@@ -1,4 +1,5 @@
-import { SubmittedTweet, TwitterUser, User, UserBase } from '@/types';
+import { Campaign, SubmittedTweet, TwitterUser, User, UserBase } from '@/types';
+import { TFunction } from 'next-i18next';
 import { SyntheticEvent } from 'react';
 
 import { GREEN, RED, YELLOW } from './constants';

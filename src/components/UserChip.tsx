@@ -10,12 +10,16 @@ const useStyles = makeStyles(({ palette }) => ({
   link: {
     color: palette.text.secondary + ' !important',
   },
+  pointer: {
+    cursor: 'pointer',
+  },
 }));
 
 const UserChip: React.FC<UserChipProps> = ({
   image,
   screenName,
   tweetCount,
+  onClick,
   ...chipProps
 }) => {
   const classes = useStyles();
@@ -26,14 +30,20 @@ const UserChip: React.FC<UserChipProps> = ({
           {screenName?.substring(0, 1).toLocaleUpperCase()}
         </Avatar>
       }
+      onClick={onClick}
       label={
-        <Link
-          className={classes.link}
-          href={`https://twitter.com/${screenName}`}
-          target="_blank"
-        >
-          {screenName! + (!!tweetCount ? ` (${tweetCount})` : '')}
-        </Link>
+        <>
+          {onClick && screenName}
+          {!onClick && (
+            <Link
+              className={classes.link}
+              href={`https://twitter.com/${screenName}`}
+              target="_blank"
+            >
+              {screenName! + (!!tweetCount ? ` (${tweetCount})` : '')}
+            </Link>
+          )}
+        </>
       }
       {...chipProps}
     ></Chip>

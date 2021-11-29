@@ -14,6 +14,7 @@ export type UserChipGridProps = GridProps & {
   userSubMap: Record<string, SubmittedTweet[]>;
   datePercentage?: number;
   requiredTweetCount?: number;
+  onSelect?: (user: UserBase) => void;
 };
 
 const UserChipGrid: React.FC<UserChipGridProps> = ({
@@ -23,6 +24,7 @@ const UserChipGrid: React.FC<UserChipGridProps> = ({
   userSubMap,
   datePercentage,
   requiredTweetCount,
+  onSelect,
   ...gridProps
 }) => {
   return (
@@ -56,6 +58,13 @@ const UserChipGrid: React.FC<UserChipGridProps> = ({
               image={image!}
               screenName={screenName!}
               tweetCount={tweetCount}
+              onClick={(e) => {
+                if (onSelect) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onSelect(u);
+                }
+              }}
             />
           </Grid>
         );

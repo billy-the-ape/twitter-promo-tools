@@ -10,6 +10,7 @@ const STORAGE_KEY = 'state';
 type SharedStateMap = {
   darkMode: boolean;
   showHidden: boolean;
+  cardView: boolean;
 };
 
 const createStateObj = (obj: SharedStateMap) =>
@@ -28,6 +29,7 @@ const getStoredState = (): GlobalState => {
   const defaultState: SharedStateMap = {
     darkMode: true,
     showHidden: false,
+    cardView: false,
   };
   let storedState = {} as SharedStateMap;
   if (storageStr) {

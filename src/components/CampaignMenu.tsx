@@ -11,31 +11,42 @@ import {
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import TwitterIcon from '@material-ui/icons/Twitter';
-import HideIcon from '@material-ui/icons/VisibilityOff';
 import ShowIcon from '@material-ui/icons/Visibility';
+import HideIcon from '@material-ui/icons/VisibilityOff';
 import { useTranslation } from 'react-i18next';
 
 import Menu from './MenuWithTrigger';
+import { patchHideCampaigns, patchUnhideCampaigns } from './util/fetch';
 
 export type CampaignMenuProps = {
   campaign: Campaign;
-  isHidden: boolean;
   onSubmitTweet?: () => void;
   onEditCampaign?: () => void;
   onDeleteCampaign?: () => void;
-  onHideCampaign?: () => void;
+  mutate: () => void;
+  showMobileIcons?: boolean;
 };
 
 const CampaignMenu: React.FC<CampaignMenuProps> = ({
   campaign,
-  isHidden,
   onSubmitTweet,
   onEditCampaign,
   onDeleteCampaign,
-  onHideCampaign,
+  mutate,
+  showMobileIcons,
 }) => {
   const { t } = useTranslation();
   const isSm = useIsMobile({ breakpoint: 'sm' });
+
+  const handleToggleHideCampaign = async () => {
+    if (!campaign.hidden) {
+      await patchHideCampaigns([String(campaign._id)]);
+      mutate();
+    } else {
+      await patchUnhideCampaigns([String(campaign._id)]);
+      mutate();
+    }
+  };
 
   const {
     influencer: isInfluencer = false,
@@ -43,9 +54,11 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
     owner: isOwner = false,
   } = campaign.permissions ?? {};
 
-  const hideString: string = isHidden ? t('unhide_campaign') : t('hide_campaign');
+  const hideString: string = campaign.hidden
+    ? t('unhide_campaign')
+    : t('hide_campaign');
 
-  return isSm ? (
+  return isSm && !showMobileIcons ? (
     <Menu id={`menu-${campaign._id}`}>
       {onSubmitTweet && isInfluencer && (
         <Menu.Item onClick={stopPropagationCallback(onSubmitTweet)}>
@@ -71,14 +84,16 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           <Typography variant="inherit">{t('delete')}</Typography>
         </Menu.Item>
       )}
-      {onHideCampaign && (
-        <Menu.Item onClick={stopPropagationCallback(onHideCampaign)}>
-          <ListItemIcon>
-            {isHidden ? <ShowIcon fontSize="small" /> : <HideIcon fontSize="small" />}
-          </ListItemIcon>
-          <Typography variant="inherit">{hideString}</Typography>
-        </Menu.Item>
-      )}
+      <Menu.Item onClick={stopPropagationCallback(handleToggleHideCampaign)}>
+        <ListItemIcon>
+          {campaign.hidden ? (
+            <ShowIcon fontSize="small" />
+          ) : (
+            <HideIcon fontSize="small" />
+          )}
+        </ListItemIcon>
+        <Typography variant="inherit">{hideString}</Typography>
+      </Menu.Item>
     </Menu>
   ) : (
     <Box display="flex">
@@ -103,13 +118,15 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           </IconButton>
         </Tooltip>
       )}
-      {onHideCampaign && (
-        <Tooltip title={hideString}>
-        <IconButton onClick={stopPropagationCallback(onHideCampaign)}>
-            {isHidden ? <ShowIcon fontSize="small" /> : <HideIcon fontSize="small" />}
+      <Tooltip title={hideString}>
+        <IconButton onClick={stopPropagationCallback(handleToggleHideCampaign)}>
+          {campaign.hidden ? (
+            <ShowIcon fontSize="small" />
+          ) : (
+            <HideIcon fontSize="small" />
+          )}
         </IconButton>
       </Tooltip>
-      )}
     </Box>
   );
 };

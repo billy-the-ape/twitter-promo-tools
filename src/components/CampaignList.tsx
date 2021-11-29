@@ -6,8 +6,7 @@ import { fetchJson } from '@/util';
 import {
   Box,
   Button,
-  CircularProgress,
-  Grid,
+  IconButton,
   TextField,
   Tooltip,
   debounce,
@@ -15,6 +14,8 @@ import {
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import CancelIcon from '@material-ui/icons/Cancel';
+import DashboardIcon from '@material-ui/icons/Dashboard';
+import ListIcon from '@material-ui/icons/List';
 import SearchIcon from '@material-ui/icons/Search';
 import SettingsIcon from '@material-ui/icons/Settings';
 import SortIcon from '@material-ui/icons/Sort';
@@ -29,18 +30,23 @@ import React, {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Waypoint } from 'react-waypoint';
 import { useSWRInfinite } from 'swr';
 
-import CampaignListItem from './CampaignListItem';
 import Menu from './MenuWithTrigger';
 import Section from './Section';
 import { deleteCampaigns, postUpsertCampaign } from './util/fetch';
 
-const CampaignDialog = dynamic(() => import('./CampaignDialog'), {
+const CampaignEditDialog = dynamic(() => import('./CampaignEditDialog'), {
   ssr: false,
 });
 const ConfirmDialog = dynamic(() => import('./ConfirmDialog'), { ssr: false });
+
+const CampaignListView = dynamic(() => import('./CampaignListView'), {
+  ssr: false,
+});
+const CampaignCardView = dynamic(() => import('./CampaignCardView'), {
+  ssr: false,
+});
 
 export type CampaignListProps = {
   className?: string;
@@ -70,14 +76,6 @@ const getSortOptions = (t: TFunction) =>
   );
 
 const useStyles = makeStyles(({ breakpoints, spacing }) => ({
-  item: {
-    maxWidth: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    '&:empty': {
-      padding: 0,
-    },
-  },
   searchField: {
     maxWidth: '200px',
   },
@@ -99,6 +97,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
   const [searchValue, setSearchValue] = useState('');
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
+  const [isCardView, setIsCardView] = useSharedState('cardView');
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
   const [deleteRecord, setDeleteCampaign] = useState<Campaign | null>(null);
   const [showHidden, setShowHidden] = useSharedState('showHidden');
@@ -179,8 +178,6 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
     setIsDialogLoading(false);
   };
 
-  const lastPage = (data?.length ?? 1) - 1;
-
   return (
     <>
       <Section
@@ -207,6 +204,17 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
               }}
             />
             <Box display="flex" className={classes.icons}>
+              <Tooltip
+                title={
+                  isCardView
+                    ? (t('list_view') as string)
+                    : (t('card_view') as string)
+                }
+              >
+                <IconButton onClick={() => setIsCardView(!isCardView)}>
+                  {isCardView ? <ListIcon /> : <DashboardIcon />}
+                </IconButton>
+              </Tooltip>
               <Menu
                 id="campaign-sort"
                 trigger={
@@ -224,7 +232,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
               <Menu
                 id="campaign-settings"
                 trigger={
-                  <Tooltip title={t('sort_campaigns') as string}>
+                  <Tooltip title={t('settings') as string}>
                     <SettingsIcon />
                   </Tooltip>
                 }
@@ -257,40 +265,28 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
         badgeNumber={data?.length || 0}
         className={className}
       >
-        <Grid container direction="column" spacing={2}>
-          {!data ? (
-            <CircularProgress style={{ margin: '12px auto' }} />
-          ) : data[0].length === 0 ? (
-            t('no_campaigns')
-          ) : (
-            data.map((campaigns, pageIndex) => {
-              const isLastPage =
-                lastPage === pageIndex && campaigns.length === 10;
-              return campaigns.map((campaign, index) => {
-                return (
-                  <Fragment key={String(campaign._id)}>
-                    {isLastPage && index === 9 && (
-                      <Waypoint
-                        onEnter={() => setSize(Math.max(size, pageIndex + 2))}
-                      />
-                    )}
-                    <Grid item className={classes.item}>
-                      <CampaignListItem
-                        campaign={campaign}
-                        mutate={mutate}
-                        setDeleteCampaign={setDeleteCampaign}
-                        setEditCampaign={setEditCampaign}
-                      />
-                    </Grid>
-                  </Fragment>
-                );
-              });
-            })
-          )}
-        </Grid>
+        {isCardView ? (
+          <CampaignCardView
+            data={data}
+            size={size}
+            setSize={setSize}
+            setDeleteCampaign={setDeleteCampaign}
+            setEditCampaign={setEditCampaign}
+            mutate={mutate}
+          />
+        ) : (
+          <CampaignListView
+            data={data}
+            size={size}
+            setSize={setSize}
+            setDeleteCampaign={setDeleteCampaign}
+            setEditCampaign={setEditCampaign}
+            mutate={mutate}
+          />
+        )}
       </Section>
       {(showNewDialog || editCampaign) && (
-        <CampaignDialog
+        <CampaignEditDialog
           open
           isLoading={isDialogLoading}
           campaign={editCampaign}

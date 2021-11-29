@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 
+import CampaignAvatars from './CampaignAvatars';
 import CampaignCompletion from './CampaignCompletion';
 import CsvButton from './CsvButton';
 import TweetList from './TweetList';
@@ -32,7 +33,8 @@ import { deleteTweetFromCampaign } from './util/fetch';
 export type CampaignDetailsProps = {
   campaign: Campaign;
   mutate: () => void;
-  expandMembers: boolean;
+  showAvatars?: boolean;
+  expandMembers?: boolean;
   tweetString?: string;
 };
 
@@ -80,6 +82,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   campaign,
   mutate,
   tweetString,
+  showAvatars,
 }) => {
   const [{ user }] = useSession() as any;
   const [showTweets, setShowTweets] = useState(false);
@@ -89,6 +92,7 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   const classes = useStyles();
   const [expandMembers, setExpandMembers] = useState(false);
   const isMobile = useIsMobile();
+  const showAvatarGroup = isMobile || showAvatars;
 
   const userSubMap = useMemo(
     () =>
@@ -187,25 +191,16 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
           </Collapse>
         </Box>
         {campaign.influencers && !!campaign.influencers.length && (
-          <Hidden smUp>
-            <AvatarGroup
-              tabIndex={0}
-              className={classes.avatars}
-              onClick={() => setExpandMembers(!expandMembers)}
-              spacing="small"
-              max={15}
-            >
-              {campaign.influencers.map((u) => {
-                const { screenName, image } =
-                  getFullUserData(u, campaign.users!) ?? {};
-                return (
-                  <Avatar key={screenName} src={image!}>
-                    {screenName?.substring(0, 1).toLocaleUpperCase()}
-                  </Avatar>
-                );
-              })}
-            </AvatarGroup>
-          </Hidden>
+          <>
+            {showAvatarGroup && (
+              <CampaignAvatars
+                campaign={campaign}
+                className={classes.avatars}
+                onClick={() => setExpandMembers(!expandMembers)}
+                max={15}
+              />
+            )}
+          </>
         )}
         <Collapse in={expandMembers || expandMembersFromProps}>
           {!!campaign.creator &&
