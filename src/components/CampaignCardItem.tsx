@@ -74,11 +74,11 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
   titleButton: {
     marginLeft: spacing(-1),
     marginRight: spacing(-1),
-    minWidth: '100%',
+    width: '100%',
     textTransform: 'none',
   },
   description: {
-    maxHeight: '4.1em',
+    maxHeight: '62px',
     overflow: 'hidden',
     textAlign: 'initial',
     fontWeight: 'normal',
