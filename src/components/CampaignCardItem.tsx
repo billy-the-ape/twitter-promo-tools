@@ -119,9 +119,11 @@ const CampaignCardItem: React.FC<CampaignCardItemProps> = ({
           <Typography component="div" variant="subtitle1" noWrap>
             {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
           </Typography>
-          <Typography component="div" variant="body1">
-            <b>{tweetString}</b>
-          </Typography>
+          {tweetString && (
+            <Typography component="div" variant="body1">
+              <b>{tweetString}</b>
+            </Typography>
+          )}
           {campaign.description && (
             <div className={classes.description}>
               <CampaignDescription description={campaign.description} />
