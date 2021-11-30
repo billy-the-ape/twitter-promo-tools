@@ -78,6 +78,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     textTransform: 'none',
   },
   description: {
+    maxWidth: '100%',
     maxHeight: '62px',
     overflow: 'hidden',
     textAlign: 'initial',
