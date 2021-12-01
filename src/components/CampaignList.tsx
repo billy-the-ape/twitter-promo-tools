@@ -78,6 +78,12 @@ const getSortOptions = (t: TFunction) =>
 const useStyles = makeStyles(({ breakpoints, spacing }) => ({
   searchField: {
     maxWidth: '200px',
+    [breakpoints.down('xs')]: {
+      width: '70vw',
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+    },
   },
   searchIcon: {
     pointerEvents: 'none',
@@ -86,6 +92,13 @@ const useStyles = makeStyles(({ breakpoints, spacing }) => ({
   icons: {
     [breakpoints.up('sm')]: {
       margin: spacing(0, 2),
+    },
+  },
+  topContainer: {
+    [breakpoints.down('xs')]: {
+      position: 'relative',
+      flexDirection: 'column-reverse',
+      height: '100px',
     },
   },
 }));
@@ -183,7 +196,13 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
       <Section
         title={t('campaigns')}
         titleAdornment={
-          <Box display="flex" justifyContent="flex-end" flexBasis="50%">
+          <Box
+            className={classes.topContainer}
+            display="flex"
+            justifyContent="flex-end"
+            flexBasis="50%"
+            flexWrap="wrap"
+          >
             <TextField
               variant="outlined"
               className={classes.searchField}
@@ -248,18 +267,18 @@ const CampaignList: React.FC<CampaignListProps> = ({ className }) => {
                     : t('show_hidden_campaigns')}
                 </Menu.Item>
               </Menu>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowNewDialog(true);
+                }}
+              >
+                <AddIcon />
+                {!isMobile && t('new_campaign')}
+              </Button>
             </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowNewDialog(true);
-              }}
-            >
-              <AddIcon />
-              {isMobile ? t('new') : t('new_campaign')}
-            </Button>
           </Box>
         }
         badgeNumber={data?.length || 0}
