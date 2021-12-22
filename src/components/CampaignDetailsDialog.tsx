@@ -53,6 +53,7 @@ const CampaignDetailsDialog: React.FC<CampaignDetailsDialogProps> = ({
           </div>
           <CampaignMenu
             noEdit
+            noHide
             showMobileIcons
             mutate={mutate}
             campaign={campaign}

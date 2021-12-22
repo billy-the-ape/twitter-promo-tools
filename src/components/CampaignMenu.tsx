@@ -34,6 +34,7 @@ export type CampaignMenuProps = {
   mutate: () => void;
   showMobileIcons?: boolean;
   noEdit?: boolean;
+  noHide?: boolean;
 };
 
 const CampaignMenu: React.FC<CampaignMenuProps> = ({
@@ -44,6 +45,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
   mutate,
   showMobileIcons,
   noEdit,
+  noHide,
 }) => {
   const { t } = useTranslation();
   const isSm = useIsMobile({ breakpoint: 'sm' });
@@ -91,7 +93,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           <Typography variant="inherit">{t('submit_tweet')}</Typography>
         </Menu.Item>
       )}
-      {onEditCampaign && isManager && (
+      {!noEdit && onEditCampaign && isManager && (
         <Menu.Item onClick={stopPropagationCallback(onEditCampaign)}>
           <ListItemIcon>
             <EditIcon fontSize="small" />
@@ -99,7 +101,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           <Typography variant="inherit">{t('edit')}</Typography>
         </Menu.Item>
       )}
-      {onDeleteCampaign && isOwner && (
+      {!noEdit && onDeleteCampaign && isOwner && (
         <Menu.Item onClick={stopPropagationCallback(onDeleteCampaign)}>
           <ListItemIcon>
             <DeleteIcon fontSize="small" />
@@ -107,16 +109,18 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           <Typography variant="inherit">{t('delete')}</Typography>
         </Menu.Item>
       )}
-      <Menu.Item onClick={stopPropagationCallback(handleToggleHideCampaign)}>
-        <ListItemIcon>
-          {campaign.hidden ? (
-            <ShowIcon fontSize="small" />
-          ) : (
-            <HideIcon fontSize="small" />
-          )}
-        </ListItemIcon>
-        <Typography variant="inherit">{hideString}</Typography>
-      </Menu.Item>
+      {!noHide && (
+        <Menu.Item onClick={stopPropagationCallback(handleToggleHideCampaign)}>
+          <ListItemIcon>
+            {campaign.hidden ? (
+              <ShowIcon fontSize="small" />
+            ) : (
+              <HideIcon fontSize="small" />
+            )}
+          </ListItemIcon>
+          <Typography variant="inherit">{hideString}</Typography>
+        </Menu.Item>
+      )}
     </Menu>
   ) : (
     <Box display="flex">
@@ -139,15 +143,19 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           </IconButton>
         </Tooltip>
       )}
-      <Tooltip title={hideString}>
-        <IconButton onClick={stopPropagationCallback(handleToggleHideCampaign)}>
-          {campaign.hidden ? (
-            <ShowIcon fontSize="small" />
-          ) : (
-            <HideIcon fontSize="small" />
-          )}
-        </IconButton>
-      </Tooltip>
+      {!noHide && (
+        <Tooltip title={hideString}>
+          <IconButton
+            onClick={stopPropagationCallback(handleToggleHideCampaign)}
+          >
+            {campaign.hidden ? (
+              <ShowIcon fontSize="small" />
+            ) : (
+              <HideIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Tooltip>
+      )}
       {!noEdit && (isManager || isOwner) && (
         <Menu id={`menu-${campaign._id}`}>
           {onEditCampaign && isManager && (
