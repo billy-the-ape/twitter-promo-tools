@@ -33,6 +33,7 @@ export type CampaignDetailsProps = {
   showAvatars?: boolean;
   expandMembers?: boolean;
   tweetString?: string;
+  defaultExpandDescription?: boolean;
 };
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -80,10 +81,13 @@ const CampaignDetails: React.FC<CampaignDetailsProps> = ({
   mutate,
   tweetString,
   showAvatars,
+  defaultExpandDescription = false,
 }) => {
   const [{ user }] = useSession() as any;
   const [showTweets, setShowTweets] = useState(false);
-  const [expandDescription, setExpandDescription] = useState(false);
+  const [expandDescription, setExpandDescription] = useState(
+    defaultExpandDescription
+  );
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
   const classes = useStyles();

@@ -33,6 +33,7 @@ export type CampaignMenuProps = {
   onDeleteCampaign?: () => void;
   mutate: () => void;
   showMobileIcons?: boolean;
+  noEdit?: boolean;
 };
 
 const CampaignMenu: React.FC<CampaignMenuProps> = ({
@@ -42,6 +43,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
   onDeleteCampaign,
   mutate,
   showMobileIcons,
+  noEdit,
 }) => {
   const { t } = useTranslation();
   const isSm = useIsMobile({ breakpoint: 'sm' });
@@ -146,7 +148,7 @@ const CampaignMenu: React.FC<CampaignMenuProps> = ({
           )}
         </IconButton>
       </Tooltip>
-      {(isManager || isOwner) && (
+      {!noEdit && (isManager || isOwner) && (
         <Menu id={`menu-${campaign._id}`}>
           {onEditCampaign && isManager && (
             <Menu.Item onClick={stopPropagationCallback(onEditCampaign)}>
